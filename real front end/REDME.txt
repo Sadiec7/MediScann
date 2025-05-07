@@ -1,0 +1,15 @@
+##Frontend
+
+## Prerrequisitos
+- Node.js v16+
+- Git
+
+##  Instalación
+cd real front end
+
+# Instalar dependencias
+npm install
+npx expo install
+
+# Iniciar aplicación
+npx expo start

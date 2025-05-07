@@ -1,5 +1,5 @@
 {
-  "name": "skinaidetector",
+  "name": "skin-disease-scanner-ts",
   "version": "1.0.0",
   "main": "index.ts",
   "scripts": {
@@ -9,11 +9,13 @@
     "web": "expo start --web"
   },
   "dependencies": {
+    "@react-native-async-storage/async-storage": "2.1.2",
     "axios": "^1.9.0",
-    "expo": "~53.0.5",
+    "expo": "~53.0.8",
     "expo-camera": "~16.1.6",
     "expo-image-picker": "~16.1.4",
-    "expo-permissions": "^14.4.0",
+    "expo-media-library": "~17.1.6",
+    "expo-sharing": "~13.1.5",
     "expo-status-bar": "~2.2.3",
     "react": "19.0.0",
     "react-native": "0.79.2"
@@ -21,6 +23,7 @@
   "devDependencies": {
     "@babel/core": "^7.25.2",
     "@types/react": "~19.0.10",
+    "@types/react-native": "^0.72.8",
     "typescript": "~5.8.3"
   },
   "private": true

@@ -1,29 +1,60 @@
 {
   "expo": {
-    "name": "SkinAIDetector",
-    "slug": "SkinAIDetector",
+    "name": "Skin Disease Scanner",
+    "slug": "skin-disease-scanner",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
-    "newArchEnabled": true,
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSCameraUsageDescription": "Esta app necesita acceso a la cámara para analizar imágenes de la piel y detectar posibles enfermedades.",
+        "NSPhotoLibraryUsageDescription": "Esta app necesita acceso a tu galería para seleccionar imágenes de la piel para análisis."
+      },
+      "bundleIdentifier": "com.tudominio.skindiseasescanner"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE"
+      ],
+      "package": "com.tudominio.skindiseasescanner"
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Permite acceder a tu cámara para analizar enfermedades de la piel.",
+          "enableMicrophone": false
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "La app necesita acceso a tus fotos para seleccionar imágenes de análisis.",
+          "cameraPermission": "Permite acceder a tu cámara para tomar fotos de análisis."
+        }
+      ]
+    ],
+    "extra": {
+      "apiUrl": "http://tu-api-docker/predict"
     }
   }
 }
