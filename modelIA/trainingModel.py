@@ -53,7 +53,7 @@ model = tf.keras.Sequential([
 
 # Compilación
 model.compile(
-    optimizer='adam',
+    optimizer='adam',#optimizador que se utiliza para poder optimizar la funcion de perdida
     loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=False),
     metrics=['accuracy']
 )
