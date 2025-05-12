@@ -1,26 +1,24 @@
 {
   "expo": {
-    "name": "Skin Disease Scanner",
-    "slug": "skin-disease-scanner",
+    "name": "MediScann",
+    "slug": "MediScann",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
+    "newArchEnabled": true,
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
     "ios": {
       "supportsTablet": true,
       "infoPlist": {
-        "NSCameraUsageDescription": "Esta app necesita acceso a la cámara para analizar imágenes de la piel y detectar posibles enfermedades.",
-        "NSPhotoLibraryUsageDescription": "Esta app necesita acceso a tu galería para seleccionar imágenes de la piel para análisis."
-      },
-      "bundleIdentifier": "com.tudominio.skindiseasescanner"
+        "NSCameraUsageDescription": "Necesitamos acceso a la cámara para analizar imágenes médicas.",
+        "NSPhotoLibraryUsageDescription": "Necesitamos acceso a tus fotos para seleccionar imágenes de análisis.",
+        "NSPhotoLibraryAddUsageDescription": "Permite guardar imágenes de resultados en tu galería."
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -32,29 +30,25 @@
         "android.permission.READ_EXTERNAL_STORAGE",
         "android.permission.WRITE_EXTERNAL_STORAGE"
       ],
-      "package": "com.tudominio.skindiseasescanner"
-    },
-    "web": {
-      "favicon": "./assets/favicon.png"
+      "edgeToEdgeEnabled": true
     },
     "plugins": [
       [
         "expo-camera",
         {
-          "cameraPermission": "Permite acceder a tu cámara para analizar enfermedades de la piel.",
-          "enableMicrophone": false
+          "cameraPermission": "Permite acceder a tu cámara para analizar imágenes médicas."
         }
       ],
       [
         "expo-image-picker",
         {
-          "photosPermission": "La app necesita acceso a tus fotos para seleccionar imágenes de análisis.",
-          "cameraPermission": "Permite acceder a tu cámara para tomar fotos de análisis."
+          "photosPermission": "La app necesita acceso a tus fotos para seleccionar imágenes.",
+          "cameraPermission": "Permite acceder a tu cámara para tomar fotos."
         }
       ]
     ],
-    "extra": {
-      "apiUrl": "http://tu-api-docker/predict"
+    "web": {
+      "favicon": "./assets/favicon.png"
     }
   }
 }

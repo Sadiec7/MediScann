@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, TouchableOpacity, ActivityIndicator, ScrollView, Share, Image } from 'react-native';
-import { CameraView, useCameraPermissions, CameraCapturedPicture } from 'expo-camera';
+import { CameraView, useCameraPermissions } from 'expo-camera';
 import * as ImagePicker from 'expo-image-picker';
 import * as MediaLibrary from 'expo-media-library';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -15,26 +15,18 @@ import {
   commonStyles,
   utilityStyles,
   text
-} from './styles';
-
-interface AnalysisResult {
-  id: string;
-  date: string;
-  imageUri: string;
-  disease: string;
-  confidence?: number;
-}
+} from '../styles';
 
 export default function App() {
   const [permission, requestPermission] = useCameraPermissions();
   const [galleryPermission, requestGalleryPermission] = MediaLibrary.usePermissions();
-  const [prediction, setPrediction] = useState<string>('');
-  const [photoUri, setPhotoUri] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [zoom, setZoom] = useState<number>(0);
-  const [history, setHistory] = useState<AnalysisResult[]>([]);
-  const [showHistory, setShowHistory] = useState<boolean>(false);
-  const cameraRef = useRef<CameraView>(null);
+  const [prediction, setPrediction] = useState('');
+  const [photoUri, setPhotoUri] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [zoom, setZoom] = useState(0);
+  const [history, setHistory] = useState([]);
+  const [showHistory, setShowHistory] = useState(false);
+  const cameraRef = useRef(null);
 
   useEffect(() => {
     loadHistory();
@@ -50,7 +42,7 @@ export default function App() {
     }
   };
 
-  const saveResult = async (result: Omit<AnalysisResult, 'id'>) => {
+  const saveResult = async (result) => {
     const newEntry = {
       ...result,
       id: Date.now().toString(),
@@ -105,7 +97,7 @@ export default function App() {
     }
   };
 
-  const analyzeImage = async (uri: string) => {
+  const analyzeImage = async (uri) => {
     setIsLoading(true);
     
     try {
@@ -114,7 +106,7 @@ export default function App() {
         uri,
         type: 'image/jpeg',
         name: 'skin_analysis.jpg',
-      } as any);
+      });
 
       const API_URL = __DEV__ 
         ? 'http://192.168.1.X:5000/predict'
@@ -161,7 +153,7 @@ export default function App() {
     }
   };
 
-  const adjustZoom = (value: number) => {
+  const adjustZoom = (value) => {
     setZoom(Math.min(Math.max(0, zoom + value), 1));
   };
 

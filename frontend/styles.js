@@ -1,4 +1,3 @@
-// styles.ts
 import { StyleSheet } from 'react-native';
 
 // ====================
@@ -55,25 +54,25 @@ export const text = {
   h6: {
     fontSize: 18,
     lineHeight: 24,
-    fontWeight: '500' as const,
+    fontWeight: '500',
     color: colors.textPrimary,
   },
   h5: {
     fontSize: 20,
     lineHeight: 28,
-    fontWeight: '500' as const,
+    fontWeight: '500',
     color: colors.textPrimary,
   },
   h4: {
     fontSize: 24,
     lineHeight: 32,
-    fontWeight: '500' as const,
+    fontWeight: '500',
     color: colors.textPrimary,
   },
   h3: {
     fontSize: 28,
     lineHeight: 36,
-    fontWeight: '500' as const,
+    fontWeight: '500',
     color: colors.textPrimary,
   },
 };
@@ -141,7 +140,7 @@ export const cameraStyles = StyleSheet.create({
   },
   captureButtonInner: {
     width: 60,
-    height: 60,/*  */
+    height: 60,
     borderRadius: radius.circle,
     backgroundColor: colors.white,
   },
