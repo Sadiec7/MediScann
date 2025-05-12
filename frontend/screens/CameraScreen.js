@@ -17,7 +17,7 @@ import {
   text
 } from '../styles';
 
-export default function App() {
+export default function CameraScreen() {
   const [permission, requestPermission] = useCameraPermissions();
   const [galleryPermission, requestGalleryPermission] = MediaLibrary.usePermissions();
   const [prediction, setPrediction] = useState('');
