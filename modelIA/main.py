@@ -19,8 +19,8 @@ class_names = load_class_names(Config.CLASSES_PATH)
 @app.route("/predict", methods=["POST"])
 def predict():
     files = request.files.getlist("images")
-    if len(files) != 3:
-        return jsonify({"error": "Se requieren exactamente 3 imágenes"}), 400
+    #if len(files) != 1:
+        #return jsonify({"error": "Se requieren exactamente 3 imágenes"}), 400
 
     imgs = [preprocess_image(f.stream) for f in files]
     batch = np.stack(imgs, axis=0)

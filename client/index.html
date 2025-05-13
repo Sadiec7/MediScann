@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Test API Skin Disease</title>
+  <style>
+    body { font-family: sans-serif; padding: 2em; }
+    label { display: block; margin: .8em 0; }
+    button { margin-top: 1em; padding: .5em 1em; }
+    pre { background: #f4f4f4; padding: 1em; white-space: pre-wrap; }
+  </style>
+</head>
+<body>
+  <h1>Prueba API /predict</h1>
+  <form id="form">
+    <label>Imagen 1: <input type="file" name="images" accept="image/*" required></label>
+    <!--<label>Imagen 2: <input type="file" name="images" accept="image/*" required></label>
+    <label>Imagen 3: <input type="file" name="images" accept="image/*" required></label>-->
+    <button type="submit">Enviar a API</button>
+  </form>
+
+  <h2>Respuesta:</h2>
+  <pre id="output">Aquí saldrá el JSON de la API</pre>
+
+  <script>
+    document.getElementById('form').addEventListener('submit', async e => {
+      e.preventDefault();
+      const data = new FormData(e.target);
+      const out = document.getElementById('output');
+      out.textContent = 'Enviando…';
+
+      try {
+        const res = await fetch('http://127.0.0.1:5000/predict', {
+          method: 'POST',
+          body: data
+        });
+        const json = await res.json();
+        out.textContent = JSON.stringify(json, null, 2);
+      } catch (err) {
+        out.textContent = 'ERROR: ' + err;
+      }
+    });
+  </script>
+</body>
+</html>
