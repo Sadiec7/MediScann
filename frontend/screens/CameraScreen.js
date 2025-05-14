@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, TouchableOpacity, ActivityIndicator, ScrollView, Share, Image, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, ActivityIndicator, ScrollView, Share, Image, Alert, Modal } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import NetInfo from '@react-native-community/netinfo';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -32,6 +32,7 @@ export default function CameraScreen({ navigation }) {
   const [userData, setUserData] = useState(null);
   const filteredHistory = history.filter(item => item.userId === userData?.correo);
   const [isConnected, setIsConnected] = useState(true);
+  const [apiLoading, setApiLoading] = useState(false);
 
   useEffect(() => {
     const loadInitialData = async () => {
@@ -121,6 +122,7 @@ export default function CameraScreen({ navigation }) {
 
   const analyzeImage = async (uri) => {
     setIsLoading(true);
+    setApiLoading(true);
 
     try {
       const formData = new FormData();
@@ -155,14 +157,14 @@ export default function CameraScreen({ navigation }) {
     } catch (error) {
       if (error.code === 'ECONNABORTED') {
         // Timeout
-        Alert.alert('Error', 'La conexión con el servidor tardó demasiado.');
+        Alert.alert('Error', 'La conexión con el servidor tardó demasiado');
       } else if (error.message === 'Network Error') {
         // No hay conexión a internet o la API no está disponible
         Alert.alert('Error', 'No se pudo conectar al servidor. Verifica tu conexión.');
       } else {
         // Otro tipo de error
         console.error('Error desconocido:', error);
-        Alert.alert('Error', 'Ocurrió un error al comunicarse con la API.');
+        Alert.alert('Error', 'Ocurrió un error al comunicarse con el servidor');
       }
 
       if (axios.isAxiosError(error)) {
@@ -174,6 +176,7 @@ export default function CameraScreen({ navigation }) {
       }
     } finally {
       setIsLoading(false);
+      setApiLoading(false);
     }
   };
 
@@ -221,6 +224,31 @@ export default function CameraScreen({ navigation }) {
 
   return (
     <View style={globalStyles.container}>
+      {/* Modal de carga global */}
+      <Modal
+        transparent={true}
+        animationType="fade"
+        visible={apiLoading}
+        onRequestClose={() => setApiLoading(false)}
+      >
+        <View style={{
+          flex: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+          backgroundColor: 'rgba(0,0,0,0.5)'
+        }}>
+          <View style={{
+            backgroundColor: 'white',
+            padding: 20,
+            borderRadius: 10,
+            alignItems: 'center'
+          }}>
+            <ActivityIndicator size="large" color={colors.primary} />
+            <Text style={{ marginTop: 10 }}>Analizando imagen...</Text>
+          </View>
+        </View>
+      </Modal>
+
       {showHistory ? (
         <View style={historyStyles.container}>
           <ScrollView>
