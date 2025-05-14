@@ -103,8 +103,8 @@ const RootNavigator = () => {
   );
 };
 
-// 7. App principal con AuthProvider
-export default function App() {
+// App principal con AuthProvider
+export default function App() { 
   return (
     <AuthProvider>
       <RootNavigator />
