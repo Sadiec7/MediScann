@@ -18,43 +18,59 @@ import HistoryScreen from './screens/HistoryScreen';
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
 
-const MainTabs = () => {
-  return (
-    <Tab.Navigator
-      screenOptions={({ route }) => ({
-        tabBarIcon: ({ focused, color, size }) => {
-          let iconName;
-          if (route.name === 'Home') {
-            iconName = focused ? 'home' : 'home-outline';
-          } else if (route.name === 'Camera') {
-            iconName = focused ? 'camera' : 'camera-outline';
-          } else if (route.name === 'Settings') {
-            iconName = focused ? 'settings' : 'settings-outline';
-          }
-          return <Ionicons name={iconName} size={size} color={color} />;
-        },
-        tabBarActiveTintColor: '#3A7BFF',
-        tabBarInactiveTintColor: 'gray',
-        headerShown: false,
-        tabBarStyle: {
-          backgroundColor: '#FFFFFF',           // Fondo blanco
-          borderTopWidth: 0,                    // Sin borde superior
-          paddingBottom: 4,                     // Espaciado inferior
-          height: 80,                           // Altura
-        },
-        tabBarLabelStyle: {
-          fontSize: 10,                         // Tamaño texto
-          marginBottom: 4,                      // Margen inferior
-        },
-      })}
-    >
-      <Tab.Screen name="Home" component={HomeScreen} options={{ title: "Inicio" }} />
-      <Tab.Screen name="Camera" component={CameraScreen} options={{ title: "Cámara" }} />
-      <Tab.Screen name="Settings" component={SettingsScreen} options={{ title: "Configuración" }} />
-    </Tab.Navigator>
-  );
-};
+// 1. Stack para History (compartido)
+const HistoryStack = () => (
+  <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <Stack.Screen name="HistoryMain" component={HistoryScreen} />
+  </Stack.Navigator>
+);
 
+// 2. HomeStack (Home + AnalysisDetail + History)
+const HomeStack = () => (
+  <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <Stack.Screen name="HomeMain" component={HomeScreen} />
+    <Stack.Screen name="AnalysisDetail" component={AnalysisDetailScreen} />
+    <Stack.Screen name="History" component={HistoryStack} />
+  </Stack.Navigator>
+);
+
+// 3. CameraStack (Camera + History)
+const CameraStack = () => (
+  <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <Stack.Screen name="CameraMain" component={CameraScreen} />
+    <Stack.Screen name="History" component={HistoryStack} />
+  </Stack.Navigator>
+);
+
+// 4. MainTabs (Home, Camera, Settings)
+const MainTabs = () => (
+  <Tab.Navigator
+    screenOptions={({ route }) => ({
+      tabBarIcon: ({ focused, color, size }) => {
+        let iconName;
+        if (route.name === 'Home') iconName = focused ? 'home' : 'home-outline';
+        else if (route.name === 'Camera') iconName = focused ? 'camera' : 'camera-outline';
+        else if (route.name === 'Settings') iconName = focused ? 'settings' : 'settings-outline';
+        return <Ionicons name={iconName} size={size} color={color} />;
+      },
+      tabBarActiveTintColor: '#3A7BFF',
+      tabBarInactiveTintColor: 'gray',
+      headerShown: false,
+      tabBarStyle: {
+        backgroundColor: '#FFFFFF',
+        borderTopWidth: 0,
+        paddingBottom: 4,
+        height: 80,
+      },
+    })}
+  >
+    <Tab.Screen name="Home" component={HomeStack} options={{ title: 'Inicio' }} />
+    <Tab.Screen name="Camera" component={CameraStack} options={{ title: 'Cámara' }} />
+    <Tab.Screen name="Settings" component={SettingsScreen} options={{ title: 'Configuración' }} />
+  </Tab.Navigator>
+);
+
+// 5. AuthStack (Login + SignUp)
 const AuthStack = () => (
   <Stack.Navigator screenOptions={{ headerShown: false }}>
     <Stack.Screen name="Login" component={LoginScreen} />
@@ -62,6 +78,7 @@ const AuthStack = () => (
   </Stack.Navigator>
 );
 
+// 6. RootNavigator (decide entre Auth o MainTabs)
 const RootNavigator = () => {
   const { userToken, isLoading } = useAuth();
 
@@ -77,11 +94,7 @@ const RootNavigator = () => {
     <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         {userToken ? (
-          <>
-            <Stack.Screen name="Main" component={MainTabs} />
-            <Stack.Screen name="AnalysisDetail" component={AnalysisDetailScreen} />
-            <Stack.Screen name="History" component={HistoryScreen} />
-          </>
+          <Stack.Screen name="Main" component={MainTabs} />
         ) : (
           <Stack.Screen name="Auth" component={AuthStack} />
         )}
@@ -90,6 +103,7 @@ const RootNavigator = () => {
   );
 };
 
+// 7. App principal con AuthProvider
 export default function App() {
   return (
     <AuthProvider>
