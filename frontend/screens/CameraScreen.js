@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, TouchableOpacity, ActivityIndicator, ScrollView, Share, Image } from 'react-native';
+import { View, Text, TouchableOpacity, ActivityIndicator, ScrollView, Share, Image, Alert } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import * as ImagePicker from 'expo-image-picker';
 import * as MediaLibrary from 'expo-media-library';
@@ -99,37 +99,37 @@ export default function CameraScreen() {
 
   const analyzeImage = async (uri) => {
     setIsLoading(true);
-    
+
     try {
       const formData = new FormData();
-      formData.append('file', {
+      formData.append('images', {
         uri,
         type: 'image/jpeg',
         name: 'skin_analysis.jpg',
       });
 
-      const API_URL = __DEV__ 
-        ? 'http://192.168.1.X:5000/predict'
-        : 'https://tu-api-produccion.com/predict';
+      const API_URL = 'http://148.220.214.100:5000/predict'; // Cambia esto si tu IP cambia
 
       const response = await axios.post(API_URL, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
         timeout: 15000,
       });
-      
-      const result = {
-        disease: response.data.disease,
-        confidence: response.data.confidence,
-        imageUri: uri
-      };
-      
-      setPrediction(
-        response.data.confidence 
-          ? `${response.data.disease} (${(response.data.confidence * 100).toFixed(1)}% confianza)`
-          : response.data.disease
-      );
-      
-      await saveResult(result);
+
+      const predictions = response.data.predictions;
+
+      if (predictions && predictions.length > 0) {
+        const result = {
+          disease: predictions[0],
+          confidence: null,
+          imageUri: uri
+        };
+
+        setPrediction(predictions[0]);
+        await saveResult(result);
+      } else {
+        setPrediction('No se detectó ninguna condición.');
+      }
+
     } catch (error) {
       if (axios.isAxiosError(error)) {
         console.error('Error de red:', error.message);
@@ -146,10 +146,10 @@ export default function CameraScreen() {
   const shareResult = async () => {
     try {
       await Share.share({
-        message: `Resultado de análisis de piel: ${prediction}`,
+        message: prediction,
       });
     } catch (error) {
-      console.error('Error sharing:', error);
+      console.error('Error al compartir:', error);
     }
   };
 
@@ -213,7 +213,7 @@ export default function CameraScreen() {
             onPress={() => setShowHistory(false)}
             style={[commonStyles.button, historyStyles.backButton]}
           >
-            <Text style={commonStyles.buttonText}>Volver a la Cámara</Text>
+            <Text style={commonStyles.buttonText}>Volver a la cámara</Text>
           </TouchableOpacity>
         </View>
       ) : photoUri ? (
@@ -221,7 +221,7 @@ export default function CameraScreen() {
           <Image source={{ uri: photoUri }} style={resultStyles.image} />
           
           <View style={resultStyles.resultCard}>
-            <Text style={resultStyles.title}>Resultado del Análisis:</Text>
+            <Text style={resultStyles.title}>Resultado del análisis:</Text>
             <Text style={resultStyles.resultText}>{prediction}</Text>
             
             <View style={resultStyles.buttonRow}>
@@ -229,7 +229,7 @@ export default function CameraScreen() {
                 onPress={() => setPhotoUri(null)}
                 style={[commonStyles.button, commonStyles.primaryButton, resultStyles.actionButton]}
               >
-                <Text style={commonStyles.buttonText}>Nuevo Análisis</Text>
+                <Text style={commonStyles.buttonText}>Nuevo análisis</Text>
               </TouchableOpacity>
               
               <TouchableOpacity 
@@ -245,7 +245,7 @@ export default function CameraScreen() {
               onPress={() => setShowHistory(true)}
               style={[commonStyles.button, { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.primary }]}
             >
-              <Text style={[commonStyles.buttonText, { color: colors.primary }]}>Ver Historial</Text>
+              <Text style={[commonStyles.buttonText, { color: colors.primary }]}>Historial</Text>
             </TouchableOpacity>
           </View>
         </View>
