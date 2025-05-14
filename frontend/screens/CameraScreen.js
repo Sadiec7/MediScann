@@ -27,10 +27,29 @@ export default function CameraScreen() {
   const [history, setHistory] = useState([]);
   const [showHistory, setShowHistory] = useState(false);
   const cameraRef = useRef(null);
+  const [userData, setUserData] = useState(null);
+  const filteredHistory = history.filter(item => item.userId === userData?.correo);
 
   useEffect(() => {
-    loadHistory();
-    requestGalleryPermission();
+    const loadInitialData = async () => {
+      try {
+        const storedUser = await AsyncStorage.getItem('userData');
+        if (storedUser) {
+          setUserData(JSON.parse(storedUser));
+        }
+
+        const savedHistory = await AsyncStorage.getItem('analysisHistory');
+        if (savedHistory) {
+          setHistory(JSON.parse(savedHistory));
+        }
+      } catch (error) {
+        console.error('Error cargando datos:', error);
+      }
+
+      requestGalleryPermission();
+    };
+
+    loadInitialData();
   }, []);
 
   const loadHistory = async () => {
@@ -46,7 +65,8 @@ export default function CameraScreen() {
     const newEntry = {
       ...result,
       id: Date.now().toString(),
-      date: new Date().toLocaleString(),
+      userId: userData?.correo || 'unknown',
+      date: new Date().toISOString(),
     };
     
     const updatedHistory = [newEntry, ...history];
@@ -179,7 +199,7 @@ export default function CameraScreen() {
           }} 
           style={[commonStyles.button, commonStyles.primaryButton]}
         >
-          <Text style={commonStyles.buttonText}>Conceder Permisos</Text>
+          <Text style={commonStyles.buttonText}>Conceder permisos</Text>
         </TouchableOpacity>
       </View>
     );
@@ -190,8 +210,8 @@ export default function CameraScreen() {
       {showHistory ? (
         <View style={historyStyles.container}>
           <ScrollView>
-            {history.length > 0 ? (
-              history.map((item) => (
+            {filteredHistory.length > 0 ? (
+              filteredHistory.map((item) => (
                 <View key={item.id} style={historyStyles.item}>
                   <Image source={{ uri: item.imageUri }} style={historyStyles.itemImage} />
                   <View style={historyStyles.itemContent}>
@@ -206,7 +226,7 @@ export default function CameraScreen() {
                 </View>
               ))
             ) : (
-              <Text style={historyStyles.emptyText}>No hay análisis previos</Text>
+              <Text style={[historyStyles.emptyText, { marginTop: 100 }]}>No hay análisis previos</Text>
             )}
           </ScrollView>
           <TouchableOpacity 

@@ -12,6 +12,8 @@ import HomeScreen from './screens/HomeScreen';
 import SignUpScreen from './screens/SignUpScreen';
 import CameraScreen from './screens/CameraScreen';
 import SettingsScreen from './screens/SettingsScreen';
+import AnalysisDetailScreen from './screens/AnalysisDetailScreen ';
+import HistoryScreen from './screens/HistoryScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -71,15 +73,27 @@ const RootNavigator = () => {
     );
   }
 
-  return userToken ? <MainTabs /> : <AuthStack />;
+  return (
+    <NavigationContainer>
+      <Stack.Navigator screenOptions={{ headerShown: false }}>
+        {userToken ? (
+          <>
+            <Stack.Screen name="Main" component={MainTabs} />
+            <Stack.Screen name="AnalysisDetail" component={AnalysisDetailScreen} />
+            <Stack.Screen name="History" component={HistoryScreen} />
+          </>
+        ) : (
+          <Stack.Screen name="Auth" component={AuthStack} />
+        )}
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
 };
 
 export default function App() {
   return (
     <AuthProvider>
-      <NavigationContainer>
-        <RootNavigator />
-      </NavigationContainer>
+      <RootNavigator />
     </AuthProvider>
   );
 }

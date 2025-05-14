@@ -1,47 +1,43 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Image, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
+import { useFocusEffect } from '@react-navigation/native';
 
 const HomeScreen = () => {
   const navigation = useNavigation();
   const [userData, setUserData] = useState(null);
   const [recentAnalyses, setRecentAnalyses] = useState([]);
+  const filteredAnalyses = recentAnalyses.filter(item => item.userId === userData?.correo);
 
   // Cargar datos del usuario y análisis al iniciar
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        // 1. Cargar datos del usuario
-        const userString = await AsyncStorage.getItem('userData');
-        if (userString) {
-          const user = JSON.parse(userString);
-          setUserData(user);
+  useFocusEffect(
+    useCallback(() => {
+      const loadData = async () => {
+        try {
+          // 1. Cargar datos del usuario
+          const userString = await AsyncStorage.getItem('userData');
+          if (userString) {
+            const user = JSON.parse(userString);
+            setUserData(user);
+          }
+
+          // 2. Cargar historial de análisis
+          const historyString = await AsyncStorage.getItem('analysisHistory');
+          if (historyString) {
+            setRecentAnalyses(JSON.parse(historyString).slice(0, 3));
+          } else {
+            setRecentAnalyses([]); // En caso de que no haya historial
+          }
+        } catch (error) {
+          console.error('Error cargando datos:', error);
         }
+      };
 
-        // 2. Cargar historial de análisis
-        const historyString = await AsyncStorage.getItem('analysisHistory');
-        if (historyString) {
-          setRecentAnalyses(JSON.parse(historyString).slice(0, 3)); // Últimos 3 análisis
-        }
-      } catch (error) {
-        console.error('Error cargando datos:', error);
-      }
-    };
-
-    loadData();
-  }, []);
-
-  const handleLogout = async () => {
-    try {
-      await AsyncStorage.removeItem('userToken'); // Eliminar token de sesión
-      await AsyncStorage.removeItem('currentUser'); // Opcional: eliminar datos cacheados
-      navigation.replace('Login'); // Redirigir al login
-    } catch (error) {
-      console.error('Error al cerrar sesión:', error);
-    }
-  };
+      loadData();
+    }, [])
+  );
 
   if (!userData) {
     return (
@@ -83,8 +79,32 @@ const HomeScreen = () => {
 
         {/* Análisis recientes */}
         <Text style={styles.sectionTitle}>Tus últimos análisis</Text>
-        {recentAnalyses.length > 0 ? (
-          recentAnalyses.map((analysis, index) => (
+        {/*
+          {recentAnalyses.length > 0 ? (
+            recentAnalyses.map((analysis, index) => (
+              <TouchableOpacity 
+                key={index}
+                style={styles.analysisCard}
+                onPress={() => navigation.navigate('AnalysisDetail', { analysis })}
+              >
+                <Image 
+                  source={{ uri: analysis.imageUri }} 
+                  style={styles.analysisImage} 
+                />
+                <View style={styles.analysisInfo}>
+                  <Text style={styles.analysisDate}>{analysis.date}</Text>
+                  <Text style={styles.analysisResult}>
+                    {analysis.disease || 'Sin diagnóstico'}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            ))
+          ) : (
+            <Text style={styles.emptyText}>No hay análisis recientes</Text>
+          )}
+        */}
+        {filteredAnalyses.length > 0 ? (
+          filteredAnalyses.map((analysis, index) => (
             <TouchableOpacity 
               key={index}
               style={styles.analysisCard}
@@ -112,6 +132,20 @@ const HomeScreen = () => {
           <Ionicons name="sunny" size={24} color="#FFA726" />
           <Text style={styles.tipText}>
             Usa protector solar incluso en días nublados
+          </Text>
+        </View>
+        
+        <View style={styles.tipCard}>
+          <Ionicons name="water" size={24} color="#42A5F5" />
+          <Text style={styles.tipText}>
+            Hidrata tu piel diariamente con una crema adecuada a tu tipo de piel
+          </Text>
+        </View>
+
+        <View style={styles.tipCard}>
+          <Ionicons name="leaf" size={24} color="#66BB6A" />
+          <Text style={styles.tipText}>
+            Evita tocarte el rostro con las manos sucias para prevenir irritaciones
           </Text>
         </View>
       </ScrollView>
@@ -206,6 +240,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     borderRadius: 12,
     padding: 16,
+    marginTop: 8,
     flexDirection: 'row',
     alignItems: 'center',
     elevation: 2,
