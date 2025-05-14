@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, TouchableOpacity, ActivityIndicator, ScrollView, Share, Image, Alert } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
+import NetInfo from '@react-native-community/netinfo';
+import { MaterialIcons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import * as MediaLibrary from 'expo-media-library';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -17,7 +19,7 @@ import {
   text
 } from '../styles';
 
-export default function CameraScreen() {
+export default function CameraScreen({ navigation }) {
   const [permission, requestPermission] = useCameraPermissions();
   const [galleryPermission, requestGalleryPermission] = MediaLibrary.usePermissions();
   const [prediction, setPrediction] = useState('');
@@ -29,6 +31,7 @@ export default function CameraScreen() {
   const cameraRef = useRef(null);
   const [userData, setUserData] = useState(null);
   const filteredHistory = history.filter(item => item.userId === userData?.correo);
+  const [isConnected, setIsConnected] = useState(true);
 
   useEffect(() => {
     const loadInitialData = async () => {
@@ -49,17 +52,16 @@ export default function CameraScreen() {
       requestGalleryPermission();
     };
 
-    loadInitialData();
-  }, []);
+    const unsubscribe = NetInfo.addEventListener(state => {
+      setIsConnected(state.isConnected);
+    });
 
-  const loadHistory = async () => {
-    try {
-      const savedHistory = await AsyncStorage.getItem('analysisHistory');
-      if (savedHistory) setHistory(JSON.parse(savedHistory));
-    } catch (error) {
-      console.error('Error loading history:', error);
-    }
-  };
+    loadInitialData();
+
+     return () => {
+        unsubscribe(); // Limpieza del listener de NetInfo
+      };
+  }, []);
 
   const saveResult = async (result) => {
     const newEntry = {
@@ -128,11 +130,11 @@ export default function CameraScreen() {
         name: 'skin_analysis.jpg',
       });
 
-      const API_URL = 'http://148.220.214.100:5000/predict'; // Cambia esto si tu IP cambia
+     const API_URL = 'http://148.220.214.100:5000/predict'; // Cambia esto si tu IP cambia
 
-      const response = await axios.post(API_URL, formData, {
+     const response = await axios.post(API_URL, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
-        timeout: 15000,
+        timeout: 10000,
       });
 
       const predictions = response.data.predictions;
@@ -151,6 +153,18 @@ export default function CameraScreen() {
       }
 
     } catch (error) {
+      if (error.code === 'ECONNABORTED') {
+        // Timeout
+        Alert.alert('Error', 'La conexión con el servidor tardó demasiado.');
+      } else if (error.message === 'Network Error') {
+        // No hay conexión a internet o la API no está disponible
+        Alert.alert('Error', 'No se pudo conectar al servidor. Verifica tu conexión.');
+      } else {
+        // Otro tipo de error
+        console.error('Error desconocido:', error);
+        Alert.alert('Error', 'Ocurrió un error al comunicarse con la API.');
+      }
+
       if (axios.isAxiosError(error)) {
         console.error('Error de red:', error.message);
         setPrediction('Error de conexión con el servidor');
@@ -229,12 +243,6 @@ export default function CameraScreen() {
               <Text style={[historyStyles.emptyText, { marginTop: 100 }]}>No hay análisis previos</Text>
             )}
           </ScrollView>
-          <TouchableOpacity 
-            onPress={() => setShowHistory(false)}
-            style={[commonStyles.button, historyStyles.backButton]}
-          >
-            <Text style={commonStyles.buttonText}>Volver a la cámara</Text>
-          </TouchableOpacity>
         </View>
       ) : photoUri ? (
         <View style={resultStyles.container}>
@@ -262,8 +270,8 @@ export default function CameraScreen() {
             </View>
             
             <TouchableOpacity 
-              onPress={() => setShowHistory(true)}
-              style={[commonStyles.button, { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.primary }]}
+              onPress={() => navigation.navigate('History')}
+              style={[commonStyles.button, { backgroundColor: colors.background, borderWidth: 1, borderColor: colors.primary }]}
             >
               <Text style={[commonStyles.buttonText, { color: colors.primary }]}>Historial</Text>
             </TouchableOpacity>
@@ -283,15 +291,19 @@ export default function CameraScreen() {
             <View style={cameraStyles.controlsRow}>
               <TouchableOpacity 
                 onPress={pickImage}
-                style={[cameraStyles.sideButton, commonStyles.button]}
+                style={[cameraStyles.sideButton, commonStyles.button,
+                  !isConnected && { backgroundColor: colors.disabled }]}
               >
                 <Text style={commonStyles.buttonText}>📁 Galería</Text>
               </TouchableOpacity>
               
               <TouchableOpacity 
                 onPress={takePicture} 
-                style={cameraStyles.captureButton}
-                disabled={isLoading}
+                style={[
+                  cameraStyles.captureButton,
+                  !isConnected && { backgroundColor: colors.disabled }
+                ]}
+                disabled={isLoading || !isConnected}
               >
                 {isLoading ? (
                   <ActivityIndicator size="large" color={colors.white} />
@@ -299,10 +311,29 @@ export default function CameraScreen() {
                   <View style={cameraStyles.captureButtonInner} />
                 )}
               </TouchableOpacity>
+
+              {!isConnected && (
+                <View
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    backgroundColor: 'rgba(0,0,0,0.6)', // semitransparente
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    zIndex: 1000,
+                  }}
+                >
+                  <MaterialIcons name="signal-wifi-off" size={80} color="white" />
+                  <Text style={{ color: 'white', fontSize: 24, marginTop: 10 }}>Sin conexión</Text>
+                </View>
+              )}
               
               {history.length > 0 && (
                 <TouchableOpacity 
-                  onPress={() => setShowHistory(true)}
+                  onPress={() => navigation.navigate('History')}
                   style={[cameraStyles.sideButton, commonStyles.button]}
                 >
                   <Text style={commonStyles.buttonText}>Historial</Text>

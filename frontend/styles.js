@@ -7,7 +7,7 @@ export const colors = {
   primary: '#2196F3',       // Azul principal
   primaryDark: '#1976D2',   // Azul oscuro
   secondary: '#9C27B0',     // Morado
-  background: '#000000',    // Fondo negro
+  background: '#F9F9F9',    // Fondo gris
   surface: '#121212',       // Superficies oscuras
   error: '#FF5252',         // Rojo para errores
   success: '#4CAF50',       // Verde para éxito
@@ -49,7 +49,7 @@ export const text = {
   body: {
     fontSize: 16,
     lineHeight: 24,
-    color: colors.textPrimary,
+    color: colors.black,
   },
   h6: {
     fontSize: 18,
@@ -171,7 +171,7 @@ export const cameraStyles = StyleSheet.create({
 export const resultStyles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: colors.surface,
   },
   image: {
     width: '100%',
@@ -179,7 +179,7 @@ export const resultStyles = StyleSheet.create({
     resizeMode: 'cover',
   },
   resultCard: {
-    backgroundColor: colors.surface,
+    backgroundColor: colors.background,
     padding: spacing.md,
     borderTopLeftRadius: radius.xl,
     borderTopRightRadius: radius.xl,
@@ -214,7 +214,7 @@ export const resultStyles = StyleSheet.create({
 export const historyStyles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.surface,
+    backgroundColor: colors.background,
     padding: spacing.sm,
   },
   item: {
