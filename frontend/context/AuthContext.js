@@ -21,10 +21,15 @@ export const AuthProvider = ({ children }) => {
       setState({
         userToken: token,
         currentUser: user ? JSON.parse(user) : null,
-        isLoading: false
+        isLoading: false,
+        errorMessage: null // Limpiar errores al verificar estado
       });
     } catch (e) {
-      setState(prev => ({ ...prev, isLoading: false }));
+      setState(prev => ({ 
+        ...prev, 
+        isLoading: false,
+        errorMessage: 'Error al cargar la sesión' 
+      }));
     }
   }, []);
 
@@ -32,28 +37,55 @@ export const AuthProvider = ({ children }) => {
     checkAuthState();
   }, [checkAuthState]);
 
+  const clearError = useCallback(() => {
+    setState(prev => ({ ...prev, errorMessage: null }));
+  }, []);
+
   const login = useCallback(async (username, password) => {
     try {
-      setState(prev => ({ ...prev, isLoading: true }));
+      // Limpiar errores previos y activar loading
+      setState(prev => ({ 
+        ...prev, 
+        isLoading: true,
+        errorMessage: null 
+      }));
       
+      // Validación básica de campos
+      if (!username || !password) {
+        setState(prev => ({ 
+          ...prev, 
+          isLoading: false,
+          errorMessage: 'Por favor ingresa usuario y contraseña' 
+        }));
+        return false;
+      }
+
       // Lógica de autenticación
       const storedUser = await AsyncStorage.getItem('userData');
       if (!storedUser) {
-        setState(prev => ({ ...prev, errorMessage: 'No hay usuarios registrados. Regístrese primero.' }));
-        setState(prev => ({ ...prev, isLoading: false }));
-        return false;  // Salimos sin propagación de error
-        }
+        setState(prev => ({ 
+          ...prev, 
+          isLoading: false,
+          errorMessage: 'No hay usuarios registrados. Regístrese primero.' 
+        }));
+        return false;
+      }
 
       const userData = JSON.parse(storedUser);
       const isValid = (userData.correo.toLowerCase() === username.toLowerCase()) && 
                       userData.contrasena === password;
 
       if (!isValid) {
-        setState(prev => ({ ...prev, errorMessage: 'Credenciales inválidas' }));
-        setState(prev => ({ ...prev, isLoading: false }));
-        return false;  // Salimos sin propagación de error
-        }
+        setState(prev => ({ 
+          ...prev, 
+          isLoading: false,
+          errorMessage: 'Credenciales inválidas' 
+          // NO limpiamos userToken ni currentUser
+        }));
+        return false;
+      }
 
+      // Autenticación exitosa
       const token = `fake-jwt-token-${Date.now()}`;
       await Promise.all([
         AsyncStorage.setItem('userToken', token),
@@ -69,8 +101,12 @@ export const AuthProvider = ({ children }) => {
       
       return true;
     } catch (error) {
-      setState(prev => ({ ...prev, isLoading: false, errorMessage: error.message }));
-      throw error;
+      setState(prev => ({ 
+        ...prev, 
+        isLoading: false,
+        errorMessage: error.message || 'Error al iniciar sesión' 
+      }));
+      return false;
     }
   }, []);
 
@@ -84,10 +120,15 @@ export const AuthProvider = ({ children }) => {
       setState({
         userToken: null,
         currentUser: null,
-        isLoading: false
+        isLoading: false,
+        errorMessage: null
       });
-    } catch (e) {
-      setState(prev => ({ ...prev, isLoading: false }));
+    } catch (error) {
+      setState(prev => ({ 
+        ...prev, 
+        isLoading: false,
+        errorMessage: 'Error al cerrar sesión' 
+      }));
     }
   }, []);
 
@@ -96,8 +137,10 @@ export const AuthProvider = ({ children }) => {
       userToken: state.userToken,
       isLoading: state.isLoading,
       currentUser: state.currentUser,
+      errorMessage: state.errorMessage, // Añadimos esto
       login,
-      logout
+      logout,
+      clearError // Añadimos esta función
     }}>
       {children}
     </AuthContext.Provider>

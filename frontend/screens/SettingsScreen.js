@@ -21,7 +21,6 @@ const SettingsScreen = () => {
           text: 'Salir',
           onPress: async () => {
             await logout();
-            navigation.replace('Login');
           },
         },
       ]

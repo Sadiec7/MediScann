@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, StatusBar, ActivityIndicator } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, StatusBar, ActivityIndicator, Alert } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useAuth } from '../context/AuthContext';
@@ -9,41 +9,42 @@ import { useEffect } from 'react';
 const LoginScreen = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
   const [secureEntry, setSecureEntry] = useState(true);
   const isFocused = useIsFocused();
   const navigation = useNavigation();
-  const { login, isLoading } = useAuth(); // Usamos el contexto de autenticación
+  const { login, isLoading, errorMessage, clearError } = useAuth();
 
   const navigateToSignUp = () => {
     setUsername('');
     setPassword('');
-    setErrorMessage('');
     navigation.navigate('SignUp');
   };
 
-  useEffect(() => {
-    if (isFocused) {
-      setUsername('');
-      setPassword('');
-      setErrorMessage('');
-    }
-  }, [isFocused]);
-
   const handleLogin = async () => {
+    // Validación básica de email
+    /*if (!username.includes('@') || !username.includes('.')) {
+      Alert.alert('Error', 'Por favor ingresa un email válido');
+      return;
+    }
+
+    if (password.length < 6) {
+      Alert.alert('Error', 'La contraseña debe tener al menos 6 caracteres');
+      return;
+    }*/
+    clearError();
+
     try {
-      // Validar campos no vacíos
-      if (!username || !password) {
-        setErrorMessage('Por favor ingresa usuario y contraseña');
+      const success = await login(username, password);
+      if (!success) {
+        // Mantenemos los valores ingresados para corrección
         return;
       }
-
-      // Lógica de autenticación
-      await login(username, password);
-
+      // Limpia solo en éxito
+      setUsername('');
+      setPassword('');
     } catch (error) {
-      setErrorMessage(error?.message || 'Error al iniciar sesión');
-      console.error('Error al iniciar sesión:', error);
+      // Mantiene los valores para que el usuario pueda reintentar
+      console.error('Login error:', error);
     }
   };
 
@@ -68,9 +69,11 @@ const LoginScreen = () => {
       <View style={styles.bottomContainer}>
         <View style={styles.formContainer}>
           {errorMessage ? (
-            <View style={styles.errorContainer}>
+            <View style={styles.errorContainer} accessibilityLiveRegion="assertive">
               <Icon name="warning-outline" size={20} color="#ff4444" />
-              <Text style={styles.errorText}>{errorMessage}</Text>
+              <Text style={styles.errorText} accessibilityRole="alert">
+                {errorMessage}
+              </Text>
             </View>
           ) : null}
 

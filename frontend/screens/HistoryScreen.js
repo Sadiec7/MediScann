@@ -28,8 +28,8 @@ const HistoryScreen = ({ userData }) => {
           setHistory(validatedHistory);
           
           // Filtrar análisis por usuario
-          //const filtered = validatedHistory.filter(item => item.userId === userData?.correo);     // No borrar
-          const filtered = validatedHistory;                                                        // No borrar
+          const filtered = validatedHistory.filter(item => item.userId === userData?.correo);     // No borrar
+          //const filtered = validatedHistory;                                                        // No borrar
           setFilteredAnalyses(filtered);
         } catch (error) {
           console.error('Error cargando historial:', error);
