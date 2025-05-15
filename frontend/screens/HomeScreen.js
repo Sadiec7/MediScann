@@ -1,15 +1,25 @@
-import React, { useState, useCallback } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Image, ActivityIndicator } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useNavigation } from '@react-navigation/native';
-import { useFocusEffect } from '@react-navigation/native';
+import React, { useState, useCallback } from "react";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  ScrollView,
+  Image,
+  ActivityIndicator,
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useNavigation } from "@react-navigation/native";
+import { useFocusEffect } from "@react-navigation/native";
 
 const HomeScreen = () => {
   const navigation = useNavigation();
   const [userData, setUserData] = useState(null);
   const [recentAnalyses, setRecentAnalyses] = useState([]);
-  const filteredAnalyses = recentAnalyses.filter(item => item.userId === userData?.correo);
+  const filteredAnalyses = recentAnalyses.filter(
+    (item) => item.userId === userData?.correo
+  );
 
   // Cargar datos del usuario y análisis al iniciar
   useFocusEffect(
@@ -17,21 +27,21 @@ const HomeScreen = () => {
       const loadData = async () => {
         try {
           // 1. Cargar datos del usuario
-          const userString = await AsyncStorage.getItem('userData');
+          const userString = await AsyncStorage.getItem("userData");
           if (userString) {
             const user = JSON.parse(userString);
             setUserData(user);
           }
 
           // 2. Cargar historial de análisis
-          const historyString = await AsyncStorage.getItem('analysisHistory');
+          const historyString = await AsyncStorage.getItem("analysisHistory");
           if (historyString) {
             setRecentAnalyses(JSON.parse(historyString).slice(0, 3));
           } else {
             setRecentAnalyses([]); // En caso de que no haya historial
           }
         } catch (error) {
-          console.error('Error cargando datos:', error);
+          console.error("Error cargando datos:", error);
         }
       };
 
@@ -52,7 +62,7 @@ const HomeScreen = () => {
       {/* Header con bienvenida */}
       <View style={styles.header}>
         <Text style={styles.welcomeText}>
-          ¡Hola, {userData.nombre || 'Usuario'}!
+          ¡Hola, {userData.nombre || "Usuario"}!
         </Text>
       </View>
 
@@ -60,20 +70,28 @@ const HomeScreen = () => {
       <ScrollView contentContainerStyle={styles.content}>
         {/* Acciones rápidas */}
         <View style={styles.actionsContainer}>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.actionCard}
-            onPress={() => navigation.navigate('Camera')}
+            onPress={() => navigation.navigate("Camera")}
           >
             <Ionicons name="camera" size={28} color="#2D46FF" />
             <Text style={styles.actionText}>Nuevo análisis</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.actionCard}
-            onPress={() => navigation.navigate('History')}
+            onPress={() => navigation.navigate("History")}
           >
             <Ionicons name="time" size={28} color="#2D46FF" />
             <Text style={styles.actionText}>Historial</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.actionCard}
+            onPress={() => navigation.navigate("Catalog")}
+          >
+            <Ionicons name="book" size={28} color="#2D46FF" />
+            <Text style={styles.actionText}>Enciclopedia</Text>
           </TouchableOpacity>
         </View>
 
@@ -105,19 +123,21 @@ const HomeScreen = () => {
         */}
         {filteredAnalyses.length > 0 ? (
           filteredAnalyses.map((analysis, index) => (
-            <TouchableOpacity 
+            <TouchableOpacity
               key={index}
               style={styles.analysisCard}
-              onPress={() => navigation.navigate('AnalysisDetail', { analysis })}
+              onPress={() =>
+                navigation.navigate("AnalysisDetail", { analysis })
+              }
             >
-              <Image 
-                source={{ uri: analysis.imageUri }} 
-                style={styles.analysisImage} 
+              <Image
+                source={{ uri: analysis.imageUri }}
+                style={styles.analysisImage}
               />
               <View style={styles.analysisInfo}>
                 <Text style={styles.analysisDate}>{analysis.date}</Text>
                 <Text style={styles.analysisResult}>
-                  {analysis.disease || 'Sin diagnóstico'}
+                  {analysis.disease || "Sin diagnóstico"}
                 </Text>
               </View>
             </TouchableOpacity>
@@ -134,7 +154,7 @@ const HomeScreen = () => {
             Usa protector solar incluso en días nublados
           </Text>
         </View>
-        
+
         <View style={styles.tipCard}>
           <Ionicons name="water" size={24} color="#42A5F5" />
           <Text style={styles.tipText}>
@@ -145,7 +165,8 @@ const HomeScreen = () => {
         <View style={styles.tipCard}>
           <Ionicons name="leaf" size={24} color="#66BB6A" />
           <Text style={styles.tipText}>
-            Evita tocarte el rostro con las manos sucias para prevenir irritaciones
+            Evita tocarte el rostro con las manos sucias para prevenir
+            irritaciones
           </Text>
         </View>
       </ScrollView>
@@ -156,61 +177,64 @@ const HomeScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9F9F9',
+    backgroundColor: "#F9F9F9",
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     padding: 20,
     paddingTop: 80,
-    backgroundColor: '#2D46FF',
+    backgroundColor: "#2D46FF",
   },
   welcomeText: {
     fontSize: 20,
-    fontWeight: 'bold',
-    color: 'white',
+    fontWeight: "bold",
+    color: "white",
   },
   avatar: {
     width: 50,
     height: 50,
     borderRadius: 25,
-    backgroundColor: 'white',
+    backgroundColor: "white",
   },
   content: {
     padding: 16,
   },
   actionsContainer: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     justifyContent: 'space-between',
     marginBottom: 20,
+    gap: 10,
   },
   actionCard: {
-    width: '48%',
+    width: '30%',
     backgroundColor: 'white',
     borderRadius: 12,
     padding: 16,
     alignItems: 'center',
     elevation: 2,
   },
+  
   actionText: {
     marginTop: 8,
-    color: '#333',
-    fontWeight: '500',
+    color: "#333",
+    fontWeight: "500",
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
+    fontWeight: "bold",
+    color: "#333",
     marginVertical: 12,
   },
   analysisCard: {
-    backgroundColor: 'white',
+    backgroundColor: "white",
     borderRadius: 12,
     padding: 12,
     marginBottom: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     elevation: 2,
   },
   analysisImage: {
@@ -223,37 +247,37 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   analysisDate: {
-    color: '#666',
+    color: "#666",
     fontSize: 14,
   },
   analysisResult: {
-    color: '#333',
-    fontWeight: '500',
+    color: "#333",
+    fontWeight: "500",
     fontSize: 16,
   },
   emptyText: {
-    color: '#999',
-    textAlign: 'center',
+    color: "#999",
+    textAlign: "center",
     marginVertical: 20,
   },
   tipCard: {
-    backgroundColor: 'white',
+    backgroundColor: "white",
     borderRadius: 12,
     padding: 16,
     marginTop: 8,
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     elevation: 2,
   },
   tipText: {
     marginLeft: 12,
-    color: '#333',
+    color: "#333",
     flex: 1,
   },
   loadingContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
 

@@ -14,6 +14,8 @@ import CameraScreen from './screens/CameraScreen';
 import SettingsScreen from './screens/SettingsScreen';
 import AnalysisDetailScreen from './screens/AnalysisDetailScreen ';
 import HistoryScreen from './screens/HistoryScreen';
+import DiseaseCatalogScreen from './screens/DiseaseCatalogScreen';
+import DiseaseDetailScreen from './screens/DiseaseDetailScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -31,6 +33,8 @@ const HomeStack = () => (
     <Stack.Screen name="HomeMain" component={HomeScreen} />
     <Stack.Screen name="AnalysisDetail" component={AnalysisDetailScreen} />
     <Stack.Screen name="History" component={HistoryStack} />
+    <Stack.Screen name="Catalog" component={DiseaseCatalogScreen} />
+    <Stack.Screen name="DiseaseDetail" component={DiseaseDetailScreen} />
   </Stack.Navigator>
 );
 
