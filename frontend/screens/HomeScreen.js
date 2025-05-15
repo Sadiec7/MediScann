@@ -75,7 +75,7 @@ const HomeScreen = () => {
             onPress={() => navigation.navigate("Camera")}
           >
             <Ionicons name="camera" size={28} color="#2D46FF" />
-            <Text style={styles.actionText}>Nuevo análisis</Text>
+            <Text style={styles.actionText}>Analizar</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -206,21 +206,23 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     justifyContent: 'space-between',
     marginBottom: 20,
-    gap: 10,
+    gap: 5,
   },
   actionCard: {
-    width: '30%',
+    width: '32%',
     backgroundColor: 'white',
     borderRadius: 12,
-    padding: 16,
+    padding: 20,
     alignItems: 'center',
+    justifyContent: 'center',
     elevation: 2,
   },
-  
   actionText: {
     marginTop: 8,
     color: "#333",
     fontWeight: "500",
+    textAlign: 'center',
+    fontSize: 12.3,
   },
   sectionTitle: {
     fontSize: 18,
