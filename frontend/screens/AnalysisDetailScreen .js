@@ -9,13 +9,34 @@ const AnalysisDetailScreen = () => {
   const navigation = useNavigation();
   const { analysis } = route.params;
 
+  // Función para formatear la fecha legible
+  const formatDate = (dateString) => {
+    const options = { 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    };
+    return new Date(dateString).toLocaleDateString('es-ES', options);
+  };
+
   const handleShare = async () => {
     try {
-      await Share.share({
-        message: `Resultado de análisis dermatológico:\n\nFecha: ${analysis.date}\nDiagnóstico: ${analysis.disease}\n\nAplicación MediScann`,
+      const shareOptions = {
+        title: 'Compartir resultado',
+        message: `Resultado de análisis dermatológico:\n\nFecha: ${formatDate(analysis.date)}\nDiagnóstico: ${analysis.disease}\n\nAplicación MediScann`,
+        url: analysis.imageUri,  // Añade la URI de la imagen
+        type: 'image/jpeg',     // Tipo MIME de la imagen
+      };
+
+      await Share.share(shareOptions, {
+        dialogTitle: 'Compartir resultado de análisis',
+        subject: 'Resultado dermatológico',  // Para emails
       });
     } catch (error) {
       console.error('Error al compartir:', error);
+      Alert.alert('Error', 'No se pudo compartir el análisis');
     }
   };
 
@@ -54,18 +75,6 @@ const AnalysisDetailScreen = () => {
         },
         ]
     );
-    };
-
-  // Función para formatear la fecha legible
-  const formatDate = (dateString) => {
-    const options = { 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    };
-    return new Date(dateString).toLocaleDateString('es-ES', options);
   };
 
   return (
@@ -98,7 +107,7 @@ const AnalysisDetailScreen = () => {
           
           <View style={styles.detailRow}>
             <Ionicons name="calendar" size={20} color="#2D46FF" />
-            <Text style={styles.detailText}>{analysis.date}</Text>
+            <Text style={styles.detailText}>{formatDate(analysis.date)}</Text>
           </View>
         </View>
 

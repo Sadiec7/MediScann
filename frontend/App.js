@@ -24,6 +24,7 @@ const Stack = createStackNavigator();
 const HistoryStack = () => (
   <Stack.Navigator screenOptions={{ headerShown: false }}>
     <Stack.Screen name="HistoryMain" component={HistoryScreen} />
+    <Stack.Screen name="AnalysisDetail" component={AnalysisDetailScreen} />
   </Stack.Navigator>
 );
 

@@ -57,6 +57,40 @@ const HomeScreen = () => {
     );
   }
 
+  const formatDate = (dateString) => {
+    // Si ya es una cadena formateada (para los items antiguos)
+    if (typeof dateString === 'string' && dateString.match(/\d{1,2}\/\d{1,2}\/\d{4}/)) {
+      return dateString;
+    }
+
+    let date;
+    
+    try {
+      // Intentar parsear como ISO string primero
+      date = new Date(dateString);
+      
+      // Si es inválido, intentar como timestamp
+      if (isNaN(date.getTime())) {
+        date = new Date(parseInt(dateString));
+      }
+      
+      // Si sigue siendo inválido, usar fecha actual
+      if (isNaN(date.getTime())) {
+        date = new Date();
+      }
+      
+      return date.toLocaleString('es-ES', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+    } catch {
+      return 'Fecha no disponible';
+    }
+  };
+
   return (
     <View style={styles.container}>
       {/* Header con bienvenida */}
@@ -135,7 +169,7 @@ const HomeScreen = () => {
                 style={styles.analysisImage}
               />
               <View style={styles.analysisInfo}>
-                <Text style={styles.analysisDate}>{analysis.date}</Text>
+                <Text style={styles.analysisDate}>{formatDate(analysis.date)}</Text>
                 <Text style={styles.analysisResult}>
                   {analysis.disease || "Sin diagnóstico"}
                 </Text>

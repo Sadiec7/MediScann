@@ -11,35 +11,38 @@ const HistoryScreen = ({ userData }) => {
 
   useFocusEffect(
     React.useCallback(() => {
-      const loadHistory = async () => {
+      const loadUserAndHistory = async () => {
         try {
+          // 1. Cargar usuario primero
+          const userString = await AsyncStorage.getItem('userData');
+          const user = userString ? JSON.parse(userString) : null;
+          
+          if (!user?.correo) {
+            console.log('No hay usuario logeado');
+            setFilteredAnalyses([]);
+            return;
+          }
+
+          // 2. Ahora cargar el historial
           const historyString = await AsyncStorage.getItem('analysisHistory');
           const parsedHistory = historyString ? JSON.parse(historyString) : [];
-          
-          // Validación y formato de datos
-          const validatedHistory = parsedHistory.map(item => ({
-            id: item.id?.toString() || Math.random().toString(),
-            disease: item.disease || 'Enfermedad no especificada',
-            date: item.date || new Date().toISOString(),
-            imageUri: item.imageUri || 'https://placeholder.com/image.jpg',
-            userId: item.userId || null // Asegurar que existe el campo userId
-          }));
 
-          setHistory(validatedHistory);
-          
-          // Filtrar análisis por usuario
-          const filtered = validatedHistory.filter(item => item.userId === userData?.correo);     // No borrar
-          //const filtered = validatedHistory;                                                        // No borrar
+          // 3. Filtrar
+          const filtered = parsedHistory.filter(item => 
+            item.userId?.toLowerCase() === user.correo.toLowerCase()
+          );
+
           setFilteredAnalyses(filtered);
+          setHistory(parsedHistory);
+          
         } catch (error) {
-          console.error('Error cargando historial:', error);
-          setHistory([]);
-          setFilteredAnalyses([]);
+          console.error('Error:', error);
+          setFilteredAnalises([]);
         }
       };
 
-      loadHistory();
-    }, [userData?.correo]) // Se ejecuta cuando cambia el correo del usuario
+      loadUserAndHistory();
+    }, []) // Eliminamos la dependencia de userData
   );
 
   const formatDate = (dateString) => {
@@ -149,6 +152,7 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     paddingHorizontal: 20,
+    paddingTop: 10,
   },
   emptyContainer: {
     flex: 1,

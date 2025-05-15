@@ -132,11 +132,11 @@ export default function CameraScreen({ navigation }) {
         name: 'skin_analysis.jpg',
       });
 
-     const API_URL = 'http://148.220.214.100:5000/predict'; // Cambia esto si tu IP cambia
+     const API_URL = 'http://148.220.212.33:5000/predict'; // Cambia esto si tu IP cambia
 
      const response = await axios.post(API_URL, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
-        timeout: 10000,
+        timeout: 30000,
       });
 
       const predictions = response.data.predictions;
