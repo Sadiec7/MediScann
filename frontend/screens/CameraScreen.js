@@ -19,6 +19,8 @@ import {
   text
 } from '../styles';
 
+colors.chatbot = '#4a90e2'; // NUEVO COLOR PARA EL BOTÓN DEL CHATBOT
+
 export default function CameraScreen({ navigation }) {
   const [permission, requestPermission] = useCameraPermissions();
   const [galleryPermission, requestGalleryPermission] = MediaLibrary.usePermissions();
@@ -59,9 +61,7 @@ export default function CameraScreen({ navigation }) {
 
     loadInitialData();
 
-     return () => {
-        unsubscribe(); // Limpieza del listener de NetInfo
-      };
+    return () => unsubscribe();
   }, []);
 
   const saveResult = async (result) => {
@@ -132,9 +132,9 @@ export default function CameraScreen({ navigation }) {
         name: 'skin_analysis.jpg',
       });
 
-     const API_URL = 'http://148.220.214.100:5000/predict'; // Cambia esto si tu IP cambia
+      const API_URL = 'http://148.220.214.100:5000/predict';
 
-     const response = await axios.post(API_URL, formData, {
+      const response = await axios.post(API_URL, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
         timeout: 10000,
       });
@@ -156,13 +156,10 @@ export default function CameraScreen({ navigation }) {
 
     } catch (error) {
       if (error.code === 'ECONNABORTED') {
-        // Timeout
         Alert.alert('Error', 'La conexión con el servidor tardó demasiado');
       } else if (error.message === 'Network Error') {
-        // No hay conexión a internet o la API no está disponible
         Alert.alert('Error', 'No se pudo conectar al servidor. Verifica tu conexión.');
       } else {
-        // Otro tipo de error
         console.error('Error desconocido:', error);
         Alert.alert('Error', 'Ocurrió un error al comunicarse con el servidor');
       }
@@ -192,6 +189,13 @@ export default function CameraScreen({ navigation }) {
 
   const adjustZoom = (value) => {
     setZoom(Math.min(Math.max(0, zoom + value), 1));
+  };
+
+  const goToChatbot = () => {
+    navigation.navigate('Home', {
+      screen: 'ChatBot',
+      params: { prediction: 'Dengue' },
+    });    
   };
 
   if (!permission || !galleryPermission) {
@@ -224,7 +228,6 @@ export default function CameraScreen({ navigation }) {
 
   return (
     <View style={globalStyles.container}>
-      {/* Modal de carga global */}
       <Modal
         transparent={true}
         animationType="fade"
@@ -275,11 +278,11 @@ export default function CameraScreen({ navigation }) {
       ) : photoUri ? (
         <View style={resultStyles.container}>
           <Image source={{ uri: photoUri }} style={resultStyles.image} />
-          
+
           <View style={resultStyles.resultCard}>
             <Text style={resultStyles.title}>Resultado del análisis:</Text>
             <Text style={resultStyles.resultText}>{prediction}</Text>
-            
+
             <View style={resultStyles.buttonRow}>
               <TouchableOpacity 
                 onPress={() => setPhotoUri(null)}
@@ -287,7 +290,7 @@ export default function CameraScreen({ navigation }) {
               >
                 <Text style={commonStyles.buttonText}>Nuevo análisis</Text>
               </TouchableOpacity>
-              
+
               <TouchableOpacity 
                 onPress={shareResult}
                 style={[commonStyles.button, commonStyles.secondaryButton, resultStyles.actionButton]}
@@ -296,10 +299,17 @@ export default function CameraScreen({ navigation }) {
                 <Text style={commonStyles.buttonText}>Compartir</Text>
               </TouchableOpacity>
             </View>
-            
+
+            <TouchableOpacity 
+              onPress={goToChatbot}
+              style={[commonStyles.button, { backgroundColor: colors.chatbot, marginTop: 10 }]}
+            >
+              <Text style={commonStyles.buttonText}>Consultar al Chatbot</Text>
+            </TouchableOpacity>
+
             <TouchableOpacity 
               onPress={() => navigation.navigate('History')}
-              style={[commonStyles.button, { backgroundColor: colors.background, borderWidth: 1, borderColor: colors.primary }]}
+              style={[commonStyles.button, { backgroundColor: colors.background, borderWidth: 1, borderColor: colors.primary, marginTop: 10 }]}
             >
               <Text style={[commonStyles.buttonText, { color: colors.primary }]}>Historial</Text>
             </TouchableOpacity>
@@ -314,23 +324,19 @@ export default function CameraScreen({ navigation }) {
             zoom={zoom}
             enableTorch={false}
           />
-          
+
           <View style={cameraStyles.overlay}>
             <View style={cameraStyles.controlsRow}>
               <TouchableOpacity 
                 onPress={pickImage}
-                style={[cameraStyles.sideButton, commonStyles.button,
-                  !isConnected && { backgroundColor: colors.disabled }]}
+                style={[cameraStyles.sideButton, commonStyles.button, !isConnected && { backgroundColor: colors.disabled }]}
               >
                 <Text style={commonStyles.buttonText}>📁 Galería</Text>
               </TouchableOpacity>
-              
+
               <TouchableOpacity 
                 onPress={takePicture} 
-                style={[
-                  cameraStyles.captureButton,
-                  !isConnected && { backgroundColor: colors.disabled }
-                ]}
+                style={[cameraStyles.captureButton, !isConnected && { backgroundColor: colors.disabled }]}
                 disabled={isLoading || !isConnected}
               >
                 {isLoading ? (
@@ -339,52 +345,7 @@ export default function CameraScreen({ navigation }) {
                   <View style={cameraStyles.captureButtonInner} />
                 )}
               </TouchableOpacity>
-
-              {!isConnected && (
-                <View
-                  style={{
-                    position: 'absolute',
-                    top: 0,
-                    bottom: 0,
-                    left: 0,
-                    right: 0,
-                    backgroundColor: 'rgba(0,0,0,0.6)', // semitransparente
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    zIndex: 1000,
-                  }}
-                >
-                  <MaterialIcons name="signal-wifi-off" size={80} color="white" />
-                  <Text style={{ color: 'white', fontSize: 24, marginTop: 10 }}>Sin conexión</Text>
-                </View>
-              )}
-              
-              {history.length > 0 && (
-                <TouchableOpacity 
-                  onPress={() => navigation.navigate('History')}
-                  style={[cameraStyles.sideButton, commonStyles.button]}
-                >
-                  <Text style={commonStyles.buttonText}>Historial</Text>
-                </TouchableOpacity>
-              )}
             </View>
-          </View>
-          
-          <View style={cameraStyles.zoomControls}>
-            <TouchableOpacity 
-              onPress={() => adjustZoom(0.1)}
-              style={cameraStyles.zoomButton}
-              disabled={zoom >= 1}
-            >
-              <Text style={[text.h4, { color: colors.white }]}>+</Text>
-            </TouchableOpacity>
-            <TouchableOpacity 
-              onPress={() => adjustZoom(-0.1)}
-              style={cameraStyles.zoomButton}
-              disabled={zoom <= 0}
-            >
-              <Text style={[text.h4, { color: colors.white }]}>-</Text>
-            </TouchableOpacity>
           </View>
         </View>
       )}

@@ -16,6 +16,7 @@ import AnalysisDetailScreen from './screens/AnalysisDetailScreen ';
 import HistoryScreen from './screens/HistoryScreen';
 import DiseaseCatalogScreen from './screens/DiseaseCatalogScreen';
 import DiseaseDetailScreen from './screens/DiseaseDetailScreen';
+import ChatBotScreen from './screens/ChatBotScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -35,6 +36,7 @@ const HomeStack = () => (
     <Stack.Screen name="History" component={HistoryStack} />
     <Stack.Screen name="Catalog" component={DiseaseCatalogScreen} />
     <Stack.Screen name="DiseaseDetail" component={DiseaseDetailScreen} />
+    <Stack.Screen name='ChatBot' component={ChatBotScreen} />
   </Stack.Navigator>
 );
 

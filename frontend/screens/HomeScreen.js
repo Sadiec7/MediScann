@@ -72,7 +72,7 @@ const HomeScreen = () => {
         <View style={styles.actionsContainer}>
           <TouchableOpacity
             style={styles.actionCard}
-            onPress={() => navigation.navigate("Camera")}
+            onPress={() => navigation.navigate("ChatBot", { disease: "melanoma" })}
           >
             <Ionicons name="camera" size={28} color="#2D46FF" />
             <Text style={styles.actionText}>Nuevo análisis</Text>
