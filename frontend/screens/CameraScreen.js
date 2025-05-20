@@ -33,6 +33,9 @@ export default function CameraScreen({ navigation }) {
   const filteredHistory = history.filter(item => item.userId === userData?.correo);
   const [isConnected, setIsConnected] = useState(true);
   const [apiLoading, setApiLoading] = useState(false);
+  const [selectedMode, setSelectedMode] = useState(null);
+  const [predictionData, setPredictionData] = useState(null);
+
 
   useEffect(() => {
     const loadInitialData = async () => {
@@ -88,7 +91,8 @@ export default function CameraScreen({ navigation }) {
         setIsLoading(true);
         const photo = await cameraRef.current.takePictureAsync();
         setPhotoUri(photo.uri);
-        await analyzeImage(photo.uri);
+        setPrediction(''); // Limpiar predicción anterior
+        setSelectedMode(null);
       } catch (error) {
         console.error('Error taking picture:', error);
         setPrediction('Error al capturar la imagen');
@@ -110,7 +114,6 @@ export default function CameraScreen({ navigation }) {
 
       if (!result.canceled && result.assets[0].uri) {
         setPhotoUri(result.assets[0].uri);
-        await analyzeImage(result.assets[0].uri);
       }
     } catch (error) {
       console.error('Error picking image:', error);
@@ -120,40 +123,61 @@ export default function CameraScreen({ navigation }) {
     }
   };
 
-  const analyzeImage = async (uri) => {
+  const analyzeImage = async (mode) => {
+    if (!photoUri) return;
+
     setIsLoading(true);
     setApiLoading(true);
+    setSelectedMode(mode); // Guardar el modo seleccionado
 
     try {
       const formData = new FormData();
       formData.append('images', {
-        uri,
+        uri: photoUri,
         type: 'image/jpeg',
         name: 'skin_analysis.jpg',
       });
 
-     const API_URL = 'http://148.220.212.33:5000/predict'; // Cambia esto si tu IP cambia
+     const API_URL = mode === 'dermatology'
+        ? 'http://148.220.214.136:5000/predict' 
+        : 'http://148.220.214.136:5000/health'; // Cambia esto si tu IP cambia
 
      const response = await axios.post(API_URL, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
         timeout: 30000,
       });
 
-      const predictions = response.data.predictions;
+      let result;
 
-      if (predictions && predictions.length > 0) {
-        const result = {
-          disease: predictions[0],
-          confidence: null,
-          imageUri: uri
+      if (API_URL.includes('/health')) {
+        const predictionArray = response.data['Predicción'];
+        const confidence = predictionArray?.[0]?.[0] ?? null;
+
+        result = {
+          disease: confidence !== null ? 'Condición detectada' : 'Desconocido',
+          confidence: confidence,
+          imageUri: photoUri
         };
 
-        setPrediction(predictions[0]);
-        await saveResult(result);
+        setPrediction(`Riesgo de caries: ${(confidence * 100).toFixed(2)}%`);
       } else {
-        setPrediction('No se detectó ninguna condición.');
+        const predictions = response.data.predictions;
+
+        if (predictions && predictions.length > 0) {
+          result = {
+            disease: predictions[0],
+            confidence: null,
+            imageUri: photoUri
+          };
+
+          setPrediction(predictions[0]);
+        } else {
+          setPrediction('No se detectó ninguna condición.');
+        }
       }
 
+      await saveResult(result);
+      setPredictionData(result);
     } catch (error) {
       if (error.code === 'ECONNABORTED') {
         // Timeout
@@ -180,13 +204,30 @@ export default function CameraScreen({ navigation }) {
     }
   };
 
+  const formatDate = (dateString) => {
+    const options = {
+      year: 'numeric', month: 'long', day: 'numeric',
+      hour: '2-digit', minute: '2-digit'
+    };
+    return new Date(dateString).toLocaleDateString('es-ES', options);
+  };
+
   const shareResult = async () => {
     try {
-      await Share.share({
-        message: prediction,
+      const shareOptions = {
+        title: 'Compartir resultado',
+        message: `Resultado del análisis:\n\nFecha: ${formatDate(new Date().toISOString())}\nDiagnóstico: ${predictionData.disease || prediction}\n\nAplicación MediScann`,
+        url: photoUri,  // Añade la URI de la imagen
+        type: 'image/jpeg',     // Tipo MIME de la imagen
+      };
+  
+      await Share.share(shareOptions, {
+        dialogTitle: 'Compartir resultado de análisis',
+        subject: 'Resultado dermatológico',  // Para emails
       });
     } catch (error) {
       console.error('Error al compartir:', error);
+      Alert.alert('Error', 'No se pudo compartir el análisis');
     }
   };
 
@@ -277,32 +318,69 @@ export default function CameraScreen({ navigation }) {
           <Image source={{ uri: photoUri }} style={resultStyles.image} />
           
           <View style={resultStyles.resultCard}>
-            <Text style={resultStyles.title}>Resultado del análisis:</Text>
-            <Text style={resultStyles.resultText}>{prediction}</Text>
-            
-            <View style={resultStyles.buttonRow}>
-              <TouchableOpacity 
-                onPress={() => setPhotoUri(null)}
-                style={[commonStyles.button, commonStyles.primaryButton, resultStyles.actionButton]}
-              >
-                <Text style={commonStyles.buttonText}>Nuevo análisis</Text>
-              </TouchableOpacity>
-              
-              <TouchableOpacity 
-                onPress={shareResult}
-                style={[commonStyles.button, commonStyles.secondaryButton, resultStyles.actionButton]}
-                disabled={!prediction}
-              >
-                <Text style={commonStyles.buttonText}>Compartir</Text>
-              </TouchableOpacity>
-            </View>
-            
-            <TouchableOpacity 
-              onPress={() => navigation.navigate('History')}
-              style={[commonStyles.button, { backgroundColor: colors.background, borderWidth: 1, borderColor: colors.primary }]}
-            >
-              <Text style={[commonStyles.buttonText, { color: colors.primary }]}>Historial</Text>
-            </TouchableOpacity>
+            {/* Mostrar botones de selección solo si no hay predicción */}
+            {!prediction ? (
+              <>
+                <Text style={resultStyles.title}>Selecciona el tipo de análisis:</Text>
+                
+                <View style={[resultStyles.buttonRow, { marginBottom: 20 }]}>
+                  <TouchableOpacity 
+                    onPress={() => analyzeImage('dermatology')}
+                    style={[commonStyles.button, commonStyles.primaryButton, resultStyles.actionButton]}
+                    disabled={isLoading}
+                  >
+                    <Text style={commonStyles.buttonText}>Dermatología</Text>
+                  </TouchableOpacity>
+                  
+                  <TouchableOpacity 
+                    onPress={() => analyzeImage('radiology')}
+                    style={[commonStyles.button, commonStyles.secondaryButton, resultStyles.actionButton]}
+                    disabled={isLoading}
+                  >
+                    <Text style={commonStyles.buttonText}>Radiografía</Text>
+                  </TouchableOpacity>
+                </View>
+                
+                <TouchableOpacity 
+                  onPress={() => setPhotoUri(null)}
+                  style={[commonStyles.button, { backgroundColor: colors.background }]}
+                >
+                  <Text style={[commonStyles.buttonText, { color: colors.primary }]}>Volver a capturar</Text>
+                </TouchableOpacity>
+              </>
+            ) : (
+              <>
+                <Text style={resultStyles.title}>Resultado del análisis ({selectedMode === 'dermatology' ? 'Dermatología' : 'Radiografía'}):</Text>
+                <Text style={resultStyles.resultText}>{prediction}</Text>
+                
+                <View style={resultStyles.buttonRow}>
+                  <TouchableOpacity 
+                    onPress={() => {
+                      setPhotoUri(null);
+                      setPrediction('');
+                    }}
+                    style={[commonStyles.button, commonStyles.primaryButton, resultStyles.actionButton]}
+                  >
+                    <Text style={commonStyles.buttonText}>Nuevo análisis</Text>
+                  </TouchableOpacity>
+                  
+                  <TouchableOpacity 
+                    onPress={shareResult}
+                    style={[commonStyles.button, commonStyles.secondaryButton, resultStyles.actionButton]}
+                    disabled={!prediction}
+                  >
+                    <Text style={commonStyles.buttonText}>Compartir</Text>
+                  </TouchableOpacity>
+                </View>
+                
+                <TouchableOpacity 
+                  onPress={() => navigation.navigate('History')}
+                  style={[commonStyles.button, { backgroundColor: colors.background, borderWidth: 1, borderColor: colors.primary }]}
+                >
+                  <Text style={[commonStyles.buttonText, { color: colors.primary }]}>Historial</Text>
+                </TouchableOpacity>
+              </>
+            )}
           </View>
         </View>
       ) : (
@@ -359,14 +437,12 @@ export default function CameraScreen({ navigation }) {
                 </View>
               )}
               
-              {history.length > 0 && (
-                <TouchableOpacity 
-                  onPress={() => navigation.navigate('History')}
-                  style={[cameraStyles.sideButton, commonStyles.button]}
-                >
-                  <Text style={commonStyles.buttonText}>Historial</Text>
-                </TouchableOpacity>
-              )}
+              <TouchableOpacity 
+                onPress={() => navigation.navigate('History')}
+                style={[cameraStyles.sideButton, commonStyles.button]}
+              >
+                <Text style={commonStyles.buttonText}>Historial</Text>
+              </TouchableOpacity>
             </View>
           </View>
           

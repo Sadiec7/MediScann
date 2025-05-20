@@ -15,38 +15,103 @@ import { useNavigation } from "@react-navigation/native";
 const diseases = [
   {
     id: "1",
-    name: "Acne",
+    name: "Acné",
     image: require("../assets/diseases/acne.jpg"),
-    description:
-      "A skin condition that occurs when hair follicles become clogged with oil and dead skin cells.",
+    description: "Condición cutánea por obstrucción de folículos pilosos.",
+    symptoms: [
+      "Puntos negros y blancos",
+      "Pápulas rojas inflamadas",
+      "Pústulas con pus",
+      "Nódulos dolorosos",
+      "Quistes grandes"
+    ].join('\n'),
+    treatment: [
+      "Limpieza suave 2 veces/día",
+      "Peróxido de benzoilo o ácido salicílico",
+      "Antibióticos tópicos/orales",
+      "Retinoides tópicos",
+      "Terapia hormonal (mujeres)"
+    ].join('\n')
   },
   {
     id: "2",
     name: "Melanoma",
     image: require("../assets/diseases/melanoma.jpg"),
-    description:
-      "A type of skin cancer that can spread to other organs in the body.",
+    description: "Cáncer de piel en melanocitos que puede extenderse.",
+    symptoms: [
+      "Asimetría en lunares (ABCDE)",
+      "Bordes irregulares",
+      "Color variado",
+      "Diámetro >6mm",
+      "Evolución rápida",
+      "Picazón/sangrado"
+    ].join('\n'),
+    treatment: [
+      "Escisión quirúrgica",
+      "Biopsia de ganglios",
+      "Inmunoterapia",
+      "Terapia dirigida",
+      "Quimioterapia (avanzados)"
+    ].join('\n')
   },
   {
     id: "3",
-    name: "Peeling skin",
+    name: "Descamación de la piel",
     image: require("../assets/diseases/peeling.jpg"),
-    description:
-      "When your skin starts shedding or flaking due to damage or irritation.",
+    description: "Pérdida de capas superficiales de la piel.",
+    symptoms: [
+      "Piel seca y áspera",
+      "Escamas blancas",
+      "Picazón/ardor",
+      "Enrojecimiento",
+      "Grietas (casos severos)"
+    ].join('\n'),
+    treatment: [
+      "Hidratación intensiva",
+      "Baños cortos con agua tibia",
+      "Evitar jabones agresivos",
+      "Humectantes con urea",
+      "Compresas frías"
+    ].join('\n')
   },
   {
     id: "4",
-    name: "Ring worm",
+    name: "Tiña (Anillo de gusano)",
     image: require("../assets/diseases/ringworm.jpg"),
-    description:
-      "A fungal infection that causes a ring-shaped rash on the skin.",
+    description: "Infección fúngica con erupción circular.",
+    symptoms: [
+      "Erupción en anillo",
+      "Picazón intensa",
+      "Escamas en la zona",
+      "Enrojecimiento",
+      "Pérdida de cabello (cuero cabelludo)"
+    ].join('\n'),
+    treatment: [
+      "Antifúngicos tópicos/orales",
+      "Mantener área seca",
+      "Lavar ropa con agua caliente",
+      "No compartir artículos personales"
+    ].join('\n')
   },
   {
     id: "5",
     name: "Vitiligo",
     image: require("../assets/diseases/vitiligo.jpg"),
-    description: "A condition in which the skin loses its pigment cells.",
-  },
+    description: "Pérdida de color en la piel por falta de melanocitos.",
+    symptoms: [
+      "Manchas blancas definidas",
+      "Afecta manos/rostro",
+      "Decoloración de cabello",
+      "Sin molestias físicas"
+    ].join('\n'),
+    treatment: [
+      "Fototerapia UVB",
+      "Corticosteroides tópicos",
+      "Inhibidores de calcineurina",
+      "Injertos de piel",
+      "Maquillaje corrector"
+    ].join('\n')
+  }
 ];
 
 const DiseaseCatalogScreen = () => {

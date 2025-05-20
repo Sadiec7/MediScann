@@ -25,7 +25,7 @@ const AnalysisDetailScreen = () => {
     try {
       const shareOptions = {
         title: 'Compartir resultado',
-        message: `Resultado de análisis dermatológico:\n\nFecha: ${formatDate(analysis.date)}\nDiagnóstico: ${analysis.disease}\n\nAplicación MediScann`,
+        message: `Resultado del análisis:\n\nFecha: ${formatDate(analysis.date)}\nDiagnóstico: ${analysis.disease}\n\nAplicación MediScann`,
         url: analysis.imageUri,  // Añade la URI de la imagen
         type: 'image/jpeg',     // Tipo MIME de la imagen
       };
