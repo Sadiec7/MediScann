@@ -24,3 +24,13 @@ def preprocess_image(stream, target_size=(64, 64)):
     img = Image.open(stream).convert("RGB").resize(target_size)
     arr = np.array(img) / 255.0
     return arr
+
+
+def preprocess_image2(stream, target_size=(224, 224)):
+    """
+    Recibe un stream de imagen (werkzeug.FileStorage.stream),
+    convierte a RGB, redimensiona y normaliza.
+    """
+    img = Image.open(stream).convert("RGB").resize(target_size)
+    arr = np.array(img) / 255.0
+    return arr
