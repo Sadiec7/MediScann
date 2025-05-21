@@ -16,6 +16,8 @@ export const colors = {
   textSecondary: '#BDBDBD', // Texto secundario
   white: '#FFFFFF',
   black: '#000000',
+  tertiary: '#4285F4',      // Azul para chatbot
+  chatButton: '#34A853',    // Verde para botón de chatbot
 };
 
 export const spacing = {
@@ -163,6 +165,19 @@ export const cameraStyles = StyleSheet.create({
   zoomButton: {
     padding: spacing.sm,
   },
+  chatButton: {
+    position: 'absolute',
+    top: spacing.xl,
+    right: spacing.md,
+    backgroundColor: colors.chatButton,
+    borderRadius: radius.circle,
+    width: 50,
+    height: 50,
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 100,
+    ...globalStyles.shadow,
+  },
 });
 
 // ====================
@@ -205,6 +220,23 @@ export const resultStyles = StyleSheet.create({
     marginHorizontal: spacing.sm,
     ...text.body,
     fontWeight: '500',
+  },
+  chatButton: {
+    backgroundColor: colors.chatButton,
+    borderRadius: radius.md,
+    paddingVertical: spacing.md,
+    marginTop: spacing.sm,
+    marginHorizontal: spacing.sm,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...globalStyles.shadow,
+  },
+  chatButtonText: {
+    ...text.body,
+    color: colors.white,
+    fontWeight: '600',
+    marginLeft: spacing.sm,
   },
 });
 
@@ -254,6 +286,19 @@ export const historyStyles = StyleSheet.create({
     backgroundColor: colors.error,
     margin: spacing.md,
   },
+  chatButton: {
+    position: 'absolute',
+    bottom: spacing.xl,
+    right: spacing.md,
+    backgroundColor: colors.chatButton,
+    borderRadius: radius.circle,
+    width: 60,
+    height: 60,
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 100,
+    ...globalStyles.shadow,
+  },
 });
 
 // ====================
@@ -277,6 +322,12 @@ export const commonStyles = StyleSheet.create({
   },
   secondaryButton: {
     backgroundColor: colors.secondary,
+  },
+  tertiaryButton: {
+    backgroundColor: colors.tertiary,
+  },
+  chatButton: {
+    backgroundColor: colors.chatButton,
   },
   outlineButton: {
     backgroundColor: 'transparent',

@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, TouchableOpacity, ActivityIndicator, ScrollView, Share, Image, Alert, Modal } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import NetInfo from '@react-native-community/netinfo';
-import { MaterialIcons } from '@expo/vector-icons';
+import { MaterialIcons, Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import * as MediaLibrary from 'expo-media-library';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -36,7 +36,6 @@ export default function CameraScreen({ navigation }) {
   const [selectedMode, setSelectedMode] = useState(null);
   const [predictionData, setPredictionData] = useState(null);
 
-
   useEffect(() => {
     const loadInitialData = async () => {
       try {
@@ -62,9 +61,9 @@ export default function CameraScreen({ navigation }) {
 
     loadInitialData();
 
-     return () => {
-        unsubscribe(); // Limpieza del listener de NetInfo
-      };
+    return () => {
+      unsubscribe();
+    };
   }, []);
 
   const saveResult = async (result) => {
@@ -91,7 +90,7 @@ export default function CameraScreen({ navigation }) {
         setIsLoading(true);
         const photo = await cameraRef.current.takePictureAsync();
         setPhotoUri(photo.uri);
-        setPrediction(''); // Limpiar predicción anterior
+        setPrediction('');
         setSelectedMode(null);
       } catch (error) {
         console.error('Error taking picture:', error);
@@ -128,7 +127,7 @@ export default function CameraScreen({ navigation }) {
 
     setIsLoading(true);
     setApiLoading(true);
-    setSelectedMode(mode); // Guardar el modo seleccionado
+    setSelectedMode(mode);
 
     try {
       const formData = new FormData();
@@ -138,11 +137,11 @@ export default function CameraScreen({ navigation }) {
         name: 'skin_analysis.jpg',
       });
 
-     const API_URL = mode === 'dermatology'
+      const API_URL = mode === 'dermatology'
         ? 'http://148.220.214.136:5000/predict' 
-        : 'http://148.220.214.136:5000/health'; // Cambia esto si tu IP cambia
+        : 'http://148.220.214.136:5000/health';
 
-     const response = await axios.post(API_URL, formData, {
+      const response = await axios.post(API_URL, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
         timeout: 30000,
       });
@@ -180,13 +179,10 @@ export default function CameraScreen({ navigation }) {
       setPredictionData(result);
     } catch (error) {
       if (error.code === 'ECONNABORTED') {
-        // Timeout
         Alert.alert('Error', 'La conexión con el servidor tardó demasiado');
       } else if (error.message === 'Network Error') {
-        // No hay conexión a internet o la API no está disponible
         Alert.alert('Error', 'No se pudo conectar al servidor. Verifica tu conexión.');
       } else {
-        // Otro tipo de error
         console.error('Error desconocido:', error);
         Alert.alert('Error', 'Ocurrió un error al comunicarse con el servidor');
       }
@@ -217,13 +213,13 @@ export default function CameraScreen({ navigation }) {
       const shareOptions = {
         title: 'Compartir resultado',
         message: `Resultado del análisis:\n\nFecha: ${formatDate(new Date().toISOString())}\nDiagnóstico: ${predictionData.disease || prediction}\n\nAplicación MediScann`,
-        url: photoUri,  // Añade la URI de la imagen
-        type: 'image/jpeg',     // Tipo MIME de la imagen
+        url: photoUri,
+        type: 'image/jpeg',
       };
   
       await Share.share(shareOptions, {
         dialogTitle: 'Compartir resultado de análisis',
-        subject: 'Resultado dermatológico',  // Para emails
+        subject: 'Resultado dermatológico',
       });
     } catch (error) {
       console.error('Error al compartir:', error);
@@ -265,7 +261,6 @@ export default function CameraScreen({ navigation }) {
 
   return (
     <View style={globalStyles.container}>
-      {/* Modal de carga global */}
       <Modal
         transparent={true}
         animationType="fade"
@@ -318,7 +313,6 @@ export default function CameraScreen({ navigation }) {
           <Image source={{ uri: photoUri }} style={resultStyles.image} />
           
           <View style={resultStyles.resultCard}>
-            {/* Mostrar botones de selección solo si no hay predicción */}
             {!prediction ? (
               <>
                 <Text style={resultStyles.title}>Selecciona el tipo de análisis:</Text>
@@ -370,6 +364,21 @@ export default function CameraScreen({ navigation }) {
                     disabled={!prediction}
                   >
                     <Text style={commonStyles.buttonText}>Compartir</Text>
+                  </TouchableOpacity>
+                </View>
+
+                {/* Botón del Chatbot agregado aquí */}
+                <View style={resultStyles.buttonRow}>
+                  <TouchableOpacity 
+                    onPress={() => navigation.navigate('ChatBot', 
+                      {
+                        diagnosis: prediction,
+                      }
+                    )}
+                    style={[commonStyles.button, commonStyles.tertiaryButton, resultStyles.actionButton]}
+                  >
+                    <Ionicons name="chatbubbles" size={20} color="white" />
+                    <Text style={[commonStyles.buttonText, {marginLeft: 8}]}>Hablar con el chatbot</Text>
                   </TouchableOpacity>
                 </View>
                 
@@ -426,7 +435,7 @@ export default function CameraScreen({ navigation }) {
                     bottom: 0,
                     left: 0,
                     right: 0,
-                    backgroundColor: 'rgba(0,0,0,0.6)', // semitransparente
+                    backgroundColor: 'rgba(0,0,0,0.6)',
                     justifyContent: 'center',
                     alignItems: 'center',
                     zIndex: 1000,
