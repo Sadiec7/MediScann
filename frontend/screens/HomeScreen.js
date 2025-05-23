@@ -19,7 +19,8 @@ const HomeScreen = () => {
   const [userData, setUserData] = useState(null);
   const [recentAnalyses, setRecentAnalyses] = useState([]);
   const filteredAnalyses = recentAnalyses.filter(
-    (item) => item.userId === userData?.correo
+    (item) =>
+      item.userId?.toLowerCase() === userData?.correo?.toLowerCase()
   );
 
   // Cargar datos del usuario y análisis al iniciar

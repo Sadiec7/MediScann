@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, Image, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, FlatList, Image, TouchableOpacity, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
@@ -102,6 +102,51 @@ const HistoryScreen = ({ userData }) => {
     </TouchableOpacity>
   );
 
+  const handleDelete = () => {
+    Alert.alert(
+      'Eliminar historial',
+      '¿Estás seguro que deseas eliminar todos tus análisis?\nEsta acción no se puede deshacer.',
+      [
+        {
+          text: 'Cancelar',
+          style: 'cancel',
+        },
+        {
+          text: 'Eliminar',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              const userString = await AsyncStorage.getItem('userData');
+              const user = userString ? JSON.parse(userString) : null;
+
+              if (!user?.correo) {
+                console.warn('No se pudo identificar al usuario.');
+                return;
+              }
+
+              const historyString = await AsyncStorage.getItem('analysisHistory');
+              const history = historyString ? JSON.parse(historyString) : [];
+
+              // Filtrar los análisis que NO pertenecen al usuario actual
+              const remaining = history.filter(
+                item => item.userId?.toLowerCase() !== user.correo.toLowerCase()
+              );
+
+              // Guardar la nueva lista (sin los análisis del usuario actual)
+              await AsyncStorage.setItem('analysisHistory', JSON.stringify(remaining));
+
+              // Actualizar la pantalla
+              setFilteredAnalyses([]);
+              setHistory(remaining);
+            } catch (error) {
+              console.error('Error eliminando historial:', error);
+            }
+          },
+        },
+      ]
+    );
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -109,7 +154,9 @@ const HistoryScreen = ({ userData }) => {
           <Ionicons name="arrow-back" size={24} color="white" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Historial</Text>
-        <View style={{ width: 24 }} />
+        <TouchableOpacity onPress={handleDelete}>
+          <Ionicons name="trash" size={24} color="white" />
+        </TouchableOpacity>
       </View>
 
       <View style={styles.content}>
