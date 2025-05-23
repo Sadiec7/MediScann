@@ -18,7 +18,8 @@ const SignUpScreen = () => {
   const scrollViewRef = useRef(null);
 
   const handleInputChange = (name, value) => {
-    setFormData({ ...formData, [name]: value });
+    const newValue = name === 'correo' ? value.toLowerCase() : value;
+    setFormData({ ...formData, [name]: newValue });
   };
 
   const handleFocus = (inputIndex) => {
@@ -29,15 +30,33 @@ const SignUpScreen = () => {
   };
 
   const handleSignUp = async () => {
+    const nameRegex = /^[A-Za-zÁÉÍÓÚáéíóúÑñ ]{1,15}$/;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
+
     if (!formData.nombre || !formData.correo || !formData.contrasena) {
       setErrorMessage('Todos los campos son obligatorios');
+      return;
+    }
+
+    if (!nameRegex.test(formData.nombre)) {
+      setErrorMessage('El nombre debe tener solo letras y máximo 15 caracteres');
+      return;
+    }
+
+    if (!emailRegex.test(formData.correo)) {
+      setErrorMessage('Correo electrónico inválido');
+      return;
+    }
+
+    if (!passwordRegex.test(formData.contrasena)) {
+      setErrorMessage('La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula, un número y un símbolo');
       return;
     }
   
     try {
       // Guardar los datos del usuario en AsyncStorage
       await AsyncStorage.setItem('userData', JSON.stringify(formData));
-      console.log('Usuario registrado:', formData);
       
       // También puedes guardar datos individuales si lo necesitas
       await AsyncStorage.setItem('username', formData.nombre);
@@ -99,6 +118,8 @@ const SignUpScreen = () => {
                 placeholder="Ingresa tu correo electrónico"
                 value={formData.correo}
                 onChangeText={(text) => handleInputChange('correo', text)}
+                autoCapitalize="none"
+                autoCorrect={false}
                 keyboardType="email-address"
                 onFocus={() => handleFocus(1)}
               />
