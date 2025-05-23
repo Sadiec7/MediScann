@@ -3,6 +3,7 @@ import { View, Text, FlatList, Image, TouchableOpacity, StyleSheet } from 'react
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
+import { HistoryScreen_styles as styles } from '../styles';
 
 const HistoryScreen = ({ userData }) => {
   const [history, setHistory] = useState([]);
@@ -128,72 +129,5 @@ const HistoryScreen = ({ userData }) => {
     </View>
   );
 };
-
-// Tus estilos existentes...
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#F9F9F9',
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: '#2D46FF',
-    paddingHorizontal: 20,
-    paddingTop: 80,
-    paddingBottom: 20,
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: 'white',
-  },
-  content: {
-    flex: 1,
-    paddingHorizontal: 20,
-    paddingTop: 10,
-  },
-  emptyContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  empty: {
-    color: '#888',
-    fontSize: 16,
-  },
-  card: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'white',
-    padding: 12,
-    borderRadius: 12,
-    marginBottom: 12,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOpacity: 0.05,
-    shadowOffset: { width: 0, height: 2 },
-  },
-  image: {
-    width: 60,
-    height: 60,
-    borderRadius: 8,
-    marginRight: 12,
-  },
-  info: {
-    flex: 1,
-  },
-  disease: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
-  },
-  date: {
-    fontSize: 13,
-    color: '#666',
-    marginTop: 4,
-  },
-});
 
 export default HistoryScreen;

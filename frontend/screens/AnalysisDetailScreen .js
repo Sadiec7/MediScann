@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, Image, ScrollView, TouchableOpacity, Share, Ale
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { AnalysisDetailScreen_styles as styles } from '../styles';
 
 const AnalysisDetailScreen = () => {
   const route = useRoute();
@@ -141,105 +142,5 @@ const getRecommendations = (diagnosis) => {
 
   return recommendations[diagnosis.toLowerCase()] || recommendations.default;
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#F9F9F9',
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 20,
-    paddingTop: 80,
-    backgroundColor: '#2D46FF',
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: 'white',
-  },
-  content: {
-    padding: 20,
-    paddingBottom: 100,
-  },
-  imageContainer: {
-    backgroundColor: 'white',
-    borderRadius: 12,
-    padding: 10,
-    marginBottom: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  analysisImage: {
-    width: '100%',
-    height: 250,
-    borderRadius: 8,
-  },
-  card: {
-    backgroundColor: 'white',
-    borderRadius: 12,
-    padding: 20,
-    marginBottom: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#2D46FF',
-    marginBottom: 15,
-  },
-  diagnosisText: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 15,
-  },
-  detailRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 10,
-  },
-  detailText: {
-    fontSize: 14,
-    color: '#666',
-    marginLeft: 10,
-  },
-  recommendationText: {
-    fontSize: 14,
-    color: '#333',
-    lineHeight: 22,
-  },
-  shareButton: {
-    position: 'absolute',
-    bottom: 30,
-    right: 20,
-    backgroundColor: '#2D46FF',
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderRadius: 25,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  shareButtonText: {
-    fontSize: 16,
-    color: 'white',
-    marginLeft: 8,
-    fontWeight: '500',
-  },
-});
 
 export default AnalysisDetailScreen;

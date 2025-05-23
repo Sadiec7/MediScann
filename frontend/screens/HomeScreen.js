@@ -12,6 +12,7 @@ import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native";
 import { useFocusEffect } from "@react-navigation/native";
+import { HomeScreen_styles as styles } from '../styles';
 
 const HomeScreen = () => {
   const navigation = useNavigation();
@@ -207,114 +208,5 @@ const HomeScreen = () => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#F9F9F9",
-  },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: 20,
-    paddingTop: 80,
-    backgroundColor: "#2D46FF",
-  },
-  welcomeText: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "white",
-  },
-  avatar: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: "white",
-  },
-  content: {
-    padding: 16,
-  },
-  actionsContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    marginBottom: 20,
-    gap: 5,
-  },
-  actionCard: {
-    width: '32%',
-    backgroundColor: 'white',
-    borderRadius: 12,
-    padding: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-    elevation: 2,
-  },
-  actionText: {
-    marginTop: 8,
-    color: "#333",
-    fontWeight: "500",
-    textAlign: 'center',
-    fontSize: 12.3,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#333",
-    marginVertical: 12,
-  },
-  analysisCard: {
-    backgroundColor: "white",
-    borderRadius: 12,
-    padding: 12,
-    marginBottom: 12,
-    flexDirection: "row",
-    alignItems: "center",
-    elevation: 2,
-  },
-  analysisImage: {
-    width: 60,
-    height: 60,
-    borderRadius: 8,
-    marginRight: 12,
-  },
-  analysisInfo: {
-    flex: 1,
-  },
-  analysisDate: {
-    color: "#666",
-    fontSize: 14,
-  },
-  analysisResult: {
-    color: "#333",
-    fontWeight: "500",
-    fontSize: 16,
-  },
-  emptyText: {
-    color: "#999",
-    textAlign: "center",
-    marginVertical: 20,
-  },
-  tipCard: {
-    backgroundColor: "white",
-    borderRadius: 12,
-    padding: 16,
-    marginTop: 8,
-    flexDirection: "row",
-    alignItems: "center",
-    elevation: 2,
-  },
-  tipText: {
-    marginLeft: 12,
-    color: "#333",
-    flex: 1,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-});
 
 export default HomeScreen;

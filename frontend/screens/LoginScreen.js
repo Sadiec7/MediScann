@@ -5,6 +5,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import { useAuth } from '../context/AuthContext';
 import { useNavigation, useIsFocused } from '@react-navigation/native';
 import { useEffect } from 'react';
+import { LoginScreen_styles as styles } from '../styles';
 
 const LoginScreen = () => {
   const [username, setUsername] = useState('');
@@ -131,117 +132,5 @@ const LoginScreen = () => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  mainContainer: {
-    flex: 1,
-    backgroundColor: '#F9F9F9',
-  },
-  gradientContainer: {
-    height: 350,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingTop: 20,
-  },
-  headerContent: {
-    alignItems: 'center',
-  },
-  logo: {
-    marginBottom: 10,
-  },
-  title: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    color: '#fff',
-  },
-  formContainer: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 25,
-    marginHorizontal: 20,
-    marginTop: -70,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
-    elevation: 5,
-  },
-  errorContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#ffeeee',
-    padding: 10,
-    borderRadius: 5,
-    marginBottom: 15,
-  },
-  errorText: {
-    color: '#ff4444',
-    marginLeft: 8,
-    fontSize: 14,
-  },
-  iconContainer: {
-    marginBottom: 20,
-    alignItems: 'center',
-  },
-  label: {
-    fontSize: 14,
-    color: '#555',
-    marginBottom: 8,
-    fontWeight: '500',
-  },
-  input: {
-    height: 50,
-    borderColor: '#ddd',
-    borderWidth: 1,
-    borderRadius: 8,
-    marginBottom: 15,
-    paddingLeft: 15,
-    backgroundColor: '#F9F9F9',
-  },
-  passwordContainer: {
-    position: 'relative',
-    marginBottom: 20,
-  },
-  passwordInput: {
-    height: 50,
-    borderColor: '#ddd',
-    borderWidth: 1,
-    borderRadius: 8,
-    paddingLeft: 15,
-    paddingRight: 50,
-    backgroundColor: '#F9F9F9',
-  },
-  eyeIcon: {
-    position: 'absolute',
-    right: 15,
-    top: 15,
-  },
-  button: {
-    backgroundColor: '#2D46FF',
-    padding: 15,
-    borderRadius: 8,
-    alignItems: 'center',
-    marginTop: 10,
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  signUpButton: {
-    alignItems: 'center',
-    marginTop: 15,
-  },
-  signUpText: {
-    color: '#2D46FF',
-    fontSize: 14,
-  },
-  footerText: {
-    textAlign: 'center',
-    marginTop: 20,
-    color: '#666',
-    fontSize: 12,
-  },
-});
 
 export default LoginScreen;
