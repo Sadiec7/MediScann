@@ -104,7 +104,7 @@ export default function ChatBot() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: "Bearer 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",
+          Authorization: "Bearer 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",
         },
         body: JSON.stringify({
           model: "deepseek/deepseek-chat",
@@ -120,7 +120,11 @@ export default function ChatBot() {
       });
 
       const data = await response.json();
-      const reply = data.choices?.[0]?.message?.content || "Lo siento, no pude procesar tu pregunta.";
+      if (!response.ok || !data.choices || !data.choices[0]?.message?.content) {
+        throw new Error("Respuesta de la API inválida");
+      }
+
+      const reply = data.choices[0].message.content;
 
       setMessages(prev => [...prev, {
         role: "assistant",
@@ -128,10 +132,11 @@ export default function ChatBot() {
         id: Date.now().toString(),
       }]);
     } catch (err) {
-      setMessages(prev => [...prev, {
-        role: "assistant",
-        content: "⚠️ Error de conexión. Por favor, intenta de nuevo.",
-        id: Date.now().toString(),
+        console.error("Error en la solicitud a OpenRouter:", err);
+        setMessages(prev => [...prev, {
+          role: "assistant",
+          content: "⚠️ Error de conexión o respuesta inválida. Por favor, intenta de nuevo.",
+          id: Date.now().toString(),
       }]);
     } finally {
       setIsLoading(false);

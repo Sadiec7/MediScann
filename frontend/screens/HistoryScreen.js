@@ -78,7 +78,7 @@ const HistoryScreen = ({ userData }) => {
     } catch {
         return 'Fecha no disponible';
     }
-    };
+  };
 
   const renderItem = ({ item }) => (
     <TouchableOpacity

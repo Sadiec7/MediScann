@@ -73,11 +73,21 @@ export default function CameraScreen({ navigation }) {
       userId: userData?.correo || 'unknown',
       date: new Date().toISOString(),
     };
-    
-    const updatedHistory = [newEntry, ...history];
-    setHistory(updatedHistory);
-    
+
     try {
+      const stored = await AsyncStorage.getItem('analysisHistory');
+      const currentHistory = stored ? JSON.parse(stored) : [];
+
+      // Filtra todo menos lo del usuario actual
+      const filtered = currentHistory.filter(
+        item => item.userId?.toLowerCase() !== newEntry.userId.toLowerCase()
+      );
+
+      // Agrega solo el nuevo análisis del usuario actual
+      const updatedHistory = [newEntry, ...filtered];
+
+      setHistory(updatedHistory); // actualiza el estado local también
+
       await AsyncStorage.setItem('analysisHistory', JSON.stringify(updatedHistory));
     } catch (error) {
       console.error('Error saving history:', error);
@@ -138,8 +148,8 @@ export default function CameraScreen({ navigation }) {
       });
 
       const API_URL = mode === 'dermatology'
-        ? 'http://148.220.214.136:5000/predict' 
-        : 'http://148.220.214.136:5000/health';
+        ? 'http://192.168.0.28:5000/predict' //148.220.214.136:5000
+        : 'http://192.168.0.28:5000/health';
 
       const response = await axios.post(API_URL, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
