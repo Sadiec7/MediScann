@@ -14,6 +14,7 @@ import {
 } from "react-native";
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
+import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import { ChatBotScreen_styles as styles } from '../styles';
 
 export default function ChatBot() {
@@ -104,10 +105,10 @@ export default function ChatBot() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: "Bearer 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",
+          Authorization: "Bearer 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",
         },
         body: JSON.stringify({
-          model: "mistral/mistral-7b-instruct",
+          model: "mistralai/mistral-7b-instruct",
           messages: [
             {
               role: "system",
@@ -156,8 +157,11 @@ export default function ChatBot() {
       <SafeAreaView style={styles.safeArea}>
         <KeyboardAvoidingView
           style={styles.content}
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
-          keyboardVerticalOffset={90}
+          behavior={Platform.OS === "ios" ? "padding" : null}
+          keyboardVerticalOffset={Platform.select({
+            ios: hp('14%'), // Ajusta según la altura exacta de tu header
+            android: hp('4%')
+          })}
         >
           {imageAnalysis && (
             <View style={styles.imageContainer}>

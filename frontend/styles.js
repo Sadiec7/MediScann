@@ -475,7 +475,7 @@ export const ChatBotScreen_styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     paddingHorizontal: wp('5%'),
-    paddingTop: Platform.OS === "ios" ? hp('7%') : hp('5%'),
+    paddingTop: Platform.OS === "ios" ? hp('8%') : hp('6%'),
     paddingBottom: hp('2%'),
     backgroundColor: "#2D46FF",
   },
@@ -492,7 +492,6 @@ export const ChatBotScreen_styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    paddingHorizontal: wp('4%'),
   },
   imageContainer: {
     alignItems: "center",
@@ -575,6 +574,13 @@ export const ChatBotScreen_styles = StyleSheet.create({
   loadingIndicator: {
     marginHorizontal: wp('2%'),
   },
+  messagesContainer: {
+    flex: 1,
+    paddingBottom: Platform.select({
+      ios: hp('10%'),
+      android: hp('8%')
+    }),
+  },
 });
 
 // ====================
@@ -590,7 +596,7 @@ export const DiseaseCatalogScreen_styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     paddingHorizontal: wp('5%'),
-    paddingTop: Platform.OS === "ios" ? hp('8%') : hp('6%'),
+    paddingTop: Platform.OS === "ios" ? hp('7%') : hp('6%'),
     paddingBottom: hp('2%'),
     backgroundColor: "#2D46FF",
   },
