@@ -77,6 +77,16 @@ export default function ChatBot() {
     ];
   };
 
+  const cleanResponseText = (text) => {
+    return text
+      .replace(/\*\*/g, '') // Elimina **
+      .replace(/\*/g, '')   // Elimina *
+      .replace(/\#/g, '')   // Elimina #
+      .replace(/\-\ /g, '\n• ') // Convierte guiones en viñetas
+      .replace(/\n\s*\n/g, '\n') // Elimina líneas vacías extras
+      .trim();
+  };
+
   useEffect(() => {
     const tips = generateInitialRecommendations(diagnosis);
     const initialMessage = {
@@ -105,10 +115,10 @@ export default function ChatBot() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: "Bearer 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",
+          Authorization: "Bearer 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",
         },
         body: JSON.stringify({
-          model: "mistralai/mistral-7b-instruct",
+          model: "deepseek/deepseek-r1:free",
           messages: [
             {
               role: "system",
@@ -125,7 +135,7 @@ export default function ChatBot() {
         throw new Error("Respuesta de la API inválida");
       }
 
-      const reply = data.choices[0].message.content;
+      const reply = cleanResponseText(data.choices[0].message.content);
 
       setMessages(prev => [...prev, {
         role: "assistant",
