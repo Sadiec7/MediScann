@@ -17,8 +17,20 @@ const SignUpScreen = () => {
   const navigation = useNavigation();
   const scrollViewRef = useRef(null);
 
+  const normalizeName = (name) => {
+    if (!name) return '';
+    return name.charAt(0).toUpperCase() + name.slice(1).toLowerCase();
+  };
+
   const handleInputChange = (name, value) => {
-    const newValue = name === 'correo' ? value.toLowerCase() : value;
+    let newValue = value;
+  
+    if (name === 'nombre') {
+      newValue = normalizeName(value);
+    } else if (name === 'correo') {
+      newValue = value.toLowerCase();
+    }
+
     setFormData({ ...formData, [name]: newValue });
   };
 
@@ -30,7 +42,7 @@ const SignUpScreen = () => {
   };
 
   const handleSignUp = async () => {
-    const nameRegex = /^[A-Za-zÁÉÍÓÚáéíóúÑñ ]{1,15}$/;
+    const nameRegex = /^(?=.{1,20}$)[A-Za-zÁÉÍÓÚáéíóúÑñ]+(?:[ ' -][A-Za-zÁÉÍÓÚáéíóúÑñ]+){0,2}$/;
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
 
@@ -40,7 +52,7 @@ const SignUpScreen = () => {
     }
 
     if (!nameRegex.test(formData.nombre)) {
-      setErrorMessage('El nombre debe tener solo letras y máximo 15 caracteres');
+      setErrorMessage('Nombre inválido (máx. 20 caracteres)');
       return;
     }
 
@@ -55,12 +67,17 @@ const SignUpScreen = () => {
     }
   
     try {
-      // Guardar los datos del usuario en AsyncStorage
-      await AsyncStorage.setItem('userData', JSON.stringify(formData));
+      const userDataToStore = {
+        nombre: normalizeName(formData.nombre), // Asegurar formato al guardar
+        correo: formData.correo.toLowerCase(),
+        contrasena: formData.contrasena
+      };
       
-      // También puedes guardar datos individuales si lo necesitas
-      await AsyncStorage.setItem('username', formData.nombre);
-      await AsyncStorage.setItem('email', formData.correo);
+      await AsyncStorage.setItem('userData', JSON.stringify(userDataToStore));
+      
+      // También se pueden guardar datos individuales si se necesitan
+      //await AsyncStorage.setItem('username', formData.nombre);
+      //await AsyncStorage.setItem('email', formData.correo);
       
       navigation.goBack();
     } catch (error) {

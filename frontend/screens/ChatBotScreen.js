@@ -104,10 +104,10 @@ export default function ChatBot() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: "Bearer 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",
+          Authorization: "Bearer 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",
         },
         body: JSON.stringify({
-          model: "deepseek/deepseek-chat",
+          model: "mistral/mistral-7b-instruct",
           messages: [
             {
               role: "system",

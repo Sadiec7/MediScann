@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, Image, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, FlatList, Image, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
@@ -8,42 +8,54 @@ import { HistoryScreen_styles as styles } from '../styles';
 const HistoryScreen = ({ userData }) => {
   const [history, setHistory] = useState([]);
   const [filteredAnalyses, setFilteredAnalyses] = useState([]);
+  const [loading, setLoading] = useState(true);
   const navigation = useNavigation();
+
+  const loadHistory = async () => {
+    setLoading(true);
+    try {
+      // 1. Verificar usuario
+      const userString = await AsyncStorage.getItem('userData');
+      const user = userString ? JSON.parse(userString) : null;
+      
+      if (!user?.correo) {
+        Alert.alert('Error', 'No se identificó al usuario');
+        setFilteredAnalyses([]);
+        return;
+      }
+
+      // 2. Cargar todo el historial
+      const historyString = await AsyncStorage.getItem('analysisHistory');
+      if (!historyString) {
+        setFilteredAnalyses([]);
+        return;
+      }
+
+      const allHistory = JSON.parse(historyString);
+      
+      // 3. Filtrar y ordenar
+      const userHistory = allHistory
+        .filter(item => 
+          item.userId?.toLowerCase() === user.correo.toLowerCase()
+        )
+        .sort((a, b) => new Date(b.date) - new Date(a.date));
+
+      console.log('Historial cargado:', userHistory); // Para depuración
+      setFilteredAnalyses(userHistory);
+      
+    } catch (error) {
+      console.error('Error loading history:', error);
+      Alert.alert('Error', 'No se pudo cargar el historial');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useFocusEffect(
     React.useCallback(() => {
-      const loadUserAndHistory = async () => {
-        try {
-          // 1. Cargar usuario primero
-          const userString = await AsyncStorage.getItem('userData');
-          const user = userString ? JSON.parse(userString) : null;
-          
-          if (!user?.correo) {
-            console.log('No hay usuario logeado');
-            setFilteredAnalyses([]);
-            return;
-          }
-
-          // 2. Ahora cargar el historial
-          const historyString = await AsyncStorage.getItem('analysisHistory');
-          const parsedHistory = historyString ? JSON.parse(historyString) : [];
-
-          // 3. Filtrar
-          const filtered = parsedHistory.filter(item => 
-            item.userId?.toLowerCase() === user.correo.toLowerCase()
-          );
-
-          setFilteredAnalyses(filtered);
-          setHistory(parsedHistory);
-          
-        } catch (error) {
-          console.error('Error:', error);
-          setFilteredAnalises([]);
-        }
-      };
-
-      loadUserAndHistory();
-    }, []) // Eliminamos la dependencia de userData
+      loadHistory();
+      return () => {}; // cleanup
+    }, [])
   );
 
   const formatDate = (dateString) => {
@@ -149,30 +161,38 @@ const HistoryScreen = ({ userData }) => {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Ionicons name="arrow-back" size={24} color="white" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Historial</Text>
-        <TouchableOpacity onPress={handleDelete}>
-          <Ionicons name="trash" size={24} color="white" />
-        </TouchableOpacity>
+      {loading ? (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#2D46FF" />
       </View>
+    ) : (
+      <>
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <Ionicons name="arrow-back" size={24} color="white" />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Historial</Text>
+          <TouchableOpacity onPress={handleDelete}>
+            <Ionicons name="trash" size={24} color="white" />
+          </TouchableOpacity>
+        </View>
 
-      <View style={styles.content}>
-        {filteredAnalyses.length === 0 ? (
-          <View style={styles.emptyContainer}>
-            <Text style={styles.empty}>No hay análisis en tu historial</Text>
-          </View>
-        ) : (
-          <FlatList
-            data={filteredAnalyses}
-            keyExtractor={(item) => item.id}
-            renderItem={renderItem}
-            contentContainerStyle={{ paddingBottom: 20 }}
-          />
-        )}
-      </View>
+        <View style={styles.content}>
+          {filteredAnalyses.length === 0 ? (
+            <View style={styles.emptyContainer}>
+              <Text style={styles.empty}>No hay análisis en tu historial</Text>
+            </View>
+          ) : (
+            <FlatList
+              data={filteredAnalyses}
+              keyExtractor={(item) => item.id}
+              renderItem={renderItem}
+              contentContainerStyle={{ paddingBottom: 20 }}
+            />
+          )}
+        </View>
+        </>
+      )}
     </View>
   );
 };

@@ -67,30 +67,37 @@ export default function CameraScreen({ navigation }) {
   }, []);
 
   const saveResult = async (result) => {
+    if (!userData?.correo) {
+      console.error("No hay usuario identificado para guardar el análisis");
+      return;
+    }
+
     const newEntry = {
       ...result,
       id: Date.now().toString(),
-      userId: userData?.correo || 'unknown',
+      userId: userData.correo.toLowerCase(), // Guardar en minúsculas para consistencia
       date: new Date().toISOString(),
     };
 
     try {
       const stored = await AsyncStorage.getItem('analysisHistory');
       const currentHistory = stored ? JSON.parse(stored) : [];
-
-      // Filtra todo menos lo del usuario actual
-      const filtered = currentHistory.filter(
-        item => item.userId?.toLowerCase() !== newEntry.userId.toLowerCase()
-      );
-
-      // Agrega solo el nuevo análisis del usuario actual
-      const updatedHistory = [newEntry, ...filtered];
-
-      setHistory(updatedHistory); // actualiza el estado local también
-
-      await AsyncStorage.setItem('analysisHistory', JSON.stringify(updatedHistory));
+      
+      // Agregar el nuevo análisis (sin filtrar los anteriores)
+      const updatedHistory = [newEntry, ...currentHistory];
+      
+      // Limitar a 100 análisis máximo
+      const limitedHistory = updatedHistory.slice(0, 100);
+      
+      await AsyncStorage.setItem('analysisHistory', JSON.stringify(limitedHistory));
+      
+      // Actualizar el estado local si es necesario
+      setHistory(limitedHistory.filter(item => 
+        item.userId?.toLowerCase() === userData.correo.toLowerCase()
+      ));
     } catch (error) {
       console.error('Error saving history:', error);
+      Alert.alert('Error', 'No se pudo guardar el análisis');
     }
   };
 
@@ -163,7 +170,7 @@ export default function CameraScreen({ navigation }) {
         const confidence = predictionArray?.[0]?.[0] ?? null;
 
         result = {
-          disease: confidence !== null ? 'Condición detectada' : 'Desconocido',
+          disease: confidence !== null ? `Condición detectada (${(confidence * 100).toFixed(2)}%)`  : 'Desconocido',
           confidence: confidence,
           imageUri: photoUri
         };
