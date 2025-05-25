@@ -167,10 +167,10 @@ export default function ChatBot() {
       <SafeAreaView style={styles.safeArea}>
         <KeyboardAvoidingView
           style={styles.content}
-          behavior={Platform.OS === "ios" ? "padding" : null}
+          behavior={Platform.OS === "ios" ? "padding" : "padding"}
           keyboardVerticalOffset={Platform.select({
             ios: hp('14%'), // Ajusta según la altura exacta de tu header
-            android: hp('4%')
+            android: hp('12%')
           })}
         >
           {imageAnalysis && (
