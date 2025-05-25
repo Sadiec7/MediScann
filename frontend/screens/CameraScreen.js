@@ -1,4 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
+import { useCallback } from 'react';
 import { View, Text, TouchableOpacity, ActivityIndicator, ScrollView, Share, Image, Alert, Modal } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import NetInfo from '@react-native-community/netinfo';
@@ -29,12 +31,23 @@ export default function CameraScreen({ navigation }) {
   const [history, setHistory] = useState([]);
   const [showHistory, setShowHistory] = useState(false);
   const cameraRef = useRef(null);
+  const [isCameraActive, setIsCameraActive] = useState(true);
   const [userData, setUserData] = useState(null);
   const filteredHistory = history.filter(item => item.userId === userData?.correo);
   const [isConnected, setIsConnected] = useState(true);
   const [apiLoading, setApiLoading] = useState(false);
   const [selectedMode, setSelectedMode] = useState(null);
   const [predictionData, setPredictionData] = useState(null);
+
+  useFocusEffect(
+    useCallback(() => {
+      setIsCameraActive(true);
+
+      return () => {
+        setIsCameraActive(false);
+      };
+    }, [])
+  );
 
   useEffect(() => {
     const loadInitialData = async () => {
@@ -122,7 +135,7 @@ export default function CameraScreen({ navigation }) {
     try {
       setIsLoading(true);
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        mediaType: 'photo',
         allowsEditing: true,
         aspect: [4, 3],
         quality: 1,
@@ -411,13 +424,15 @@ export default function CameraScreen({ navigation }) {
         </View>
       ) : (
         <View style={cameraStyles.container}>
-          <CameraView 
-            ref={cameraRef} 
-            style={cameraStyles.camera}
-            facing="back"
-            zoom={zoom}
-            enableTorch={false}
-          />
+          {isCameraActive && (
+            <CameraView 
+              ref={cameraRef} 
+              style={cameraStyles.camera}
+              facing="back"
+              zoom={zoom}
+              enableTorch={false}
+            />
+          )}
           
           <View style={cameraStyles.overlay}>
             <View style={cameraStyles.controlsRow}>

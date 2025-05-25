@@ -18,6 +18,7 @@ const LoginScreen = () => {
   const navigateToSignUp = () => {
     setUsername('');
     setPassword('');
+    clearError();
     navigation.navigate('SignUp');
   };
 

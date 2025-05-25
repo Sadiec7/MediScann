@@ -40,7 +40,6 @@ const HistoryScreen = ({ userData }) => {
         )
         .sort((a, b) => new Date(b.date) - new Date(a.date));
 
-      console.log('Historial cargado:', userHistory); // Para depuración
       setFilteredAnalyses(userHistory);
       
     } catch (error) {
@@ -172,8 +171,15 @@ const HistoryScreen = ({ userData }) => {
             <Ionicons name="arrow-back" size={24} color="white" />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Historial</Text>
-          <TouchableOpacity onPress={handleDelete}>
-            <Ionicons name="trash" size={24} color="white" />
+          <TouchableOpacity 
+            onPress={handleDelete} 
+            disabled={filteredAnalyses.length === 0}
+          >
+            <Ionicons 
+              name="trash" 
+              size={24} 
+              color={filteredAnalyses.length === 0 ? "#888" : "white"} 
+            />
           </TouchableOpacity>
         </View>
 
