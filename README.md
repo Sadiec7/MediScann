@@ -28,7 +28,6 @@ A continuación encontrarás la descripción general, estructura, tecnologías e
   - [Cómo tomar o seleccionar una foto](#cómo-tomar-o-seleccionar-una-foto)
   - [Cómo visualizar resultados en la web](#cómo-visualizar-resultados-en-la-web)
 - [Modelado y entrenamiento de IA](#modelado-y-entrenamiento-de-ia)
-- [Contribución](#contribución)
 - [Licencia](#licencia)
 
 ---
