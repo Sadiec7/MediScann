@@ -138,8 +138,8 @@ export default function CameraScreen({ navigation }) {
       });
 
       const API_URL = mode === 'dermatology'
-        ? 'http://148.220.214.136:5000/predict' 
-        : 'http://148.220.214.136:5000/health';
+        ? 'http://172.20.10.7:5000/predict' 
+        : 'http://172.20.10.7:5000/health';
 
       const response = await axios.post(API_URL, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
