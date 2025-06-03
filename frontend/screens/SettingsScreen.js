@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../context/AuthContext';
 import { useNavigation } from '@react-navigation/native';
+import { SettingsScreen_styles as styles } from '../styles';
 
 const SettingsScreen = () => {
   const { logout, currentUser } = useAuth();
@@ -59,81 +60,5 @@ const SettingsScreen = () => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#F9F9F9',
-  },
-  header: {
-    height: 80, // Altura del header
-    backgroundColor: '#2D46FF', // Mismo azul 
-    width: '100%',
-  },
-  contentContainer: {
-    flex: 1,
-    padding: 20,
-    marginTop: 0, // Para que el contenido se superponga ligeramente
-  },
-  userContainer: {
-    alignItems: 'center',
-    marginBottom: 30,
-    backgroundColor: 'white',
-    borderRadius: 12,
-    padding: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  avatar: {
-    backgroundColor: '#E8F0FE',
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 15,
-  },
-  userName: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 5,
-  },
-  userEmail: {
-    fontSize: 16,
-    color: '#666',
-  },
-  logoutButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'white',
-    padding: 16,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: '#FF3B30',
-    marginTop: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  logoutText: {
-    color: '#FF3B30',
-    fontSize: 16,
-    fontWeight: '500',
-    marginLeft: 10,
-  },
-  versionText: {
-    textAlign: 'center',
-    color: '#999',
-    marginTop: 30,
-    fontSize: 14,
-  },
-});
 
 export default SettingsScreen;

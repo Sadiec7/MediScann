@@ -1,48 +1,60 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, Image, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, FlatList, Image, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
+import { HistoryScreen_styles as styles } from '../styles';
 
 const HistoryScreen = ({ userData }) => {
   const [history, setHistory] = useState([]);
   const [filteredAnalyses, setFilteredAnalyses] = useState([]);
+  const [loading, setLoading] = useState(true);
   const navigation = useNavigation();
+
+  const loadHistory = async () => {
+    setLoading(true);
+    try {
+      // 1. Verificar usuario
+      const userString = await AsyncStorage.getItem('userData');
+      const user = userString ? JSON.parse(userString) : null;
+      
+      if (!user?.correo) {
+        Alert.alert('Error', 'No se identificó al usuario');
+        setFilteredAnalyses([]);
+        return;
+      }
+
+      // 2. Cargar todo el historial
+      const historyString = await AsyncStorage.getItem('analysisHistory');
+      if (!historyString) {
+        setFilteredAnalyses([]);
+        return;
+      }
+
+      const allHistory = JSON.parse(historyString);
+      
+      // 3. Filtrar y ordenar
+      const userHistory = allHistory
+        .filter(item => 
+          item.userId?.toLowerCase() === user.correo.toLowerCase()
+        )
+        .sort((a, b) => new Date(b.date) - new Date(a.date));
+
+      setFilteredAnalyses(userHistory);
+      
+    } catch (error) {
+      console.error('Error loading history:', error);
+      Alert.alert('Error', 'No se pudo cargar el historial');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useFocusEffect(
     React.useCallback(() => {
-      const loadUserAndHistory = async () => {
-        try {
-          // 1. Cargar usuario primero
-          const userString = await AsyncStorage.getItem('userData');
-          const user = userString ? JSON.parse(userString) : null;
-          
-          if (!user?.correo) {
-            console.log('No hay usuario logeado');
-            setFilteredAnalyses([]);
-            return;
-          }
-
-          // 2. Ahora cargar el historial
-          const historyString = await AsyncStorage.getItem('analysisHistory');
-          const parsedHistory = historyString ? JSON.parse(historyString) : [];
-
-          // 3. Filtrar
-          const filtered = parsedHistory.filter(item => 
-            item.userId?.toLowerCase() === user.correo.toLowerCase()
-          );
-
-          setFilteredAnalyses(filtered);
-          setHistory(parsedHistory);
-          
-        } catch (error) {
-          console.error('Error:', error);
-          setFilteredAnalises([]);
-        }
-      };
-
-      loadUserAndHistory();
-    }, []) // Eliminamos la dependencia de userData
+      loadHistory();
+      return () => {}; // cleanup
+    }, [])
   );
 
   const formatDate = (dateString) => {
@@ -77,7 +89,7 @@ const HistoryScreen = ({ userData }) => {
     } catch {
         return 'Fecha no disponible';
     }
-    };
+  };
 
   const renderItem = ({ item }) => (
     <TouchableOpacity
@@ -101,99 +113,94 @@ const HistoryScreen = ({ userData }) => {
     </TouchableOpacity>
   );
 
+  const handleDelete = () => {
+    Alert.alert(
+      'Eliminar historial',
+      '¿Estás seguro que deseas eliminar todos tus análisis?\nEsta acción no se puede deshacer.',
+      [
+        {
+          text: 'Cancelar',
+          style: 'cancel',
+        },
+        {
+          text: 'Eliminar',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              const userString = await AsyncStorage.getItem('userData');
+              const user = userString ? JSON.parse(userString) : null;
+
+              if (!user?.correo) {
+                console.warn('No se pudo identificar al usuario.');
+                return;
+              }
+
+              const historyString = await AsyncStorage.getItem('analysisHistory');
+              const history = historyString ? JSON.parse(historyString) : [];
+
+              // Filtrar los análisis que NO pertenecen al usuario actual
+              const remaining = history.filter(
+                item => item.userId?.toLowerCase() !== user.correo.toLowerCase()
+              );
+
+              // Guardar la nueva lista (sin los análisis del usuario actual)
+              await AsyncStorage.setItem('analysisHistory', JSON.stringify(remaining));
+
+              // Actualizar la pantalla
+              setFilteredAnalyses([]);
+              setHistory(remaining);
+            } catch (error) {
+              console.error('Error eliminando historial:', error);
+            }
+          },
+        },
+      ]
+    );
+  };
+
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Ionicons name="arrow-back" size={24} color="white" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Historial</Text>
-        <View style={{ width: 24 }} />
+      {loading ? (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#2D46FF" />
       </View>
+    ) : (
+      <>
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <Ionicons name="arrow-back" size={24} color="white" />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Historial</Text>
+          <TouchableOpacity 
+            onPress={handleDelete} 
+            disabled={filteredAnalyses.length === 0}
+          >
+            <Ionicons 
+              name="trash" 
+              size={24} 
+              color={filteredAnalyses.length === 0 ? "#888" : "white"} 
+            />
+          </TouchableOpacity>
+        </View>
 
-      <View style={styles.content}>
-        {filteredAnalyses.length === 0 ? (
-          <View style={styles.emptyContainer}>
-            <Text style={styles.empty}>No hay análisis en tu historial</Text>
-          </View>
-        ) : (
-          <FlatList
-            data={filteredAnalyses}
-            keyExtractor={(item) => item.id}
-            renderItem={renderItem}
-            contentContainerStyle={{ paddingBottom: 20 }}
-          />
-        )}
-      </View>
+        <View style={styles.content}>
+          {filteredAnalyses.length === 0 ? (
+            <View style={styles.emptyContainer}>
+              <Text style={styles.empty}>No hay análisis en tu historial</Text>
+            </View>
+          ) : (
+            <FlatList
+              data={filteredAnalyses}
+              keyExtractor={(item) => item.id}
+              renderItem={renderItem}
+              contentContainerStyle={{ paddingBottom: 20 }}
+            />
+          )}
+        </View>
+        </>
+      )}
     </View>
   );
 };
-
-// Tus estilos existentes...
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#F9F9F9',
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: '#2D46FF',
-    paddingHorizontal: 20,
-    paddingTop: 80,
-    paddingBottom: 20,
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: 'white',
-  },
-  content: {
-    flex: 1,
-    paddingHorizontal: 20,
-    paddingTop: 10,
-  },
-  emptyContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  empty: {
-    color: '#888',
-    fontSize: 16,
-  },
-  card: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'white',
-    padding: 12,
-    borderRadius: 12,
-    marginBottom: 12,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOpacity: 0.05,
-    shadowOffset: { width: 0, height: 2 },
-  },
-  image: {
-    width: 60,
-    height: 60,
-    borderRadius: 8,
-    marginRight: 12,
-  },
-  info: {
-    flex: 1,
-  },
-  disease: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
-  },
-  date: {
-    fontSize: 13,
-    color: '#666',
-    marginTop: 4,
-  },
-});
 
 export default HistoryScreen;

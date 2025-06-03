@@ -1,4 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
+import { useCallback } from 'react';
 import { View, Text, TouchableOpacity, ActivityIndicator, ScrollView, Share, Image, Alert, Modal } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import NetInfo from '@react-native-community/netinfo';
@@ -29,12 +31,23 @@ export default function CameraScreen({ navigation }) {
   const [history, setHistory] = useState([]);
   const [showHistory, setShowHistory] = useState(false);
   const cameraRef = useRef(null);
+  const [isCameraActive, setIsCameraActive] = useState(true);
   const [userData, setUserData] = useState(null);
   const filteredHistory = history.filter(item => item.userId === userData?.correo);
   const [isConnected, setIsConnected] = useState(true);
   const [apiLoading, setApiLoading] = useState(false);
   const [selectedMode, setSelectedMode] = useState(null);
   const [predictionData, setPredictionData] = useState(null);
+
+  useFocusEffect(
+    useCallback(() => {
+      setIsCameraActive(true);
+
+      return () => {
+        setIsCameraActive(false);
+      };
+    }, [])
+  );
 
   useEffect(() => {
     const loadInitialData = async () => {
@@ -67,20 +80,37 @@ export default function CameraScreen({ navigation }) {
   }, []);
 
   const saveResult = async (result) => {
+    if (!userData?.correo) {
+      console.error("No hay usuario identificado para guardar el análisis");
+      return;
+    }
+
     const newEntry = {
       ...result,
       id: Date.now().toString(),
-      userId: userData?.correo || 'unknown',
+      userId: userData.correo.toLowerCase(), // Guardar en minúsculas para consistencia
       date: new Date().toISOString(),
     };
-    
-    const updatedHistory = [newEntry, ...history];
-    setHistory(updatedHistory);
-    
+
     try {
-      await AsyncStorage.setItem('analysisHistory', JSON.stringify(updatedHistory));
+      const stored = await AsyncStorage.getItem('analysisHistory');
+      const currentHistory = stored ? JSON.parse(stored) : [];
+      
+      // Agregar el nuevo análisis (sin filtrar los anteriores)
+      const updatedHistory = [newEntry, ...currentHistory];
+      
+      // Limitar a 100 análisis máximo
+      const limitedHistory = updatedHistory.slice(0, 100);
+      
+      await AsyncStorage.setItem('analysisHistory', JSON.stringify(limitedHistory));
+      
+      // Actualizar el estado local si es necesario
+      setHistory(limitedHistory.filter(item => 
+        item.userId?.toLowerCase() === userData.correo.toLowerCase()
+      ));
     } catch (error) {
       console.error('Error saving history:', error);
+      Alert.alert('Error', 'No se pudo guardar el análisis');
     }
   };
 
@@ -105,7 +135,7 @@ export default function CameraScreen({ navigation }) {
     try {
       setIsLoading(true);
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        mediaType: 'photo',
         allowsEditing: true,
         aspect: [4, 3],
         quality: 1,
@@ -138,8 +168,10 @@ export default function CameraScreen({ navigation }) {
       });
 
       const API_URL = mode === 'dermatology'
-        ? 'http://172.20.10.7:5000/predict' 
-        : 'http://172.20.10.7:5000/health';
+
+        ? 'http://192.168.0.28:5000/predict' //148.220.214.136:5000
+        : 'http://192.168.0.28:5000/health';
+
 
       const response = await axios.post(API_URL, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
@@ -153,7 +185,7 @@ export default function CameraScreen({ navigation }) {
         const confidence = predictionArray?.[0]?.[0] ?? null;
 
         result = {
-          disease: confidence !== null ? 'Condición detectada' : 'Desconocido',
+          disease: confidence !== null ? `Condición detectada (${(confidence * 100).toFixed(2)}%)`  : 'Desconocido',
           confidence: confidence,
           imageUri: photoUri
         };
@@ -394,13 +426,15 @@ export default function CameraScreen({ navigation }) {
         </View>
       ) : (
         <View style={cameraStyles.container}>
-          <CameraView 
-            ref={cameraRef} 
-            style={cameraStyles.camera}
-            facing="back"
-            zoom={zoom}
-            enableTorch={false}
-          />
+          {isCameraActive && (
+            <CameraView 
+              ref={cameraRef} 
+              style={cameraStyles.camera}
+              facing="back"
+              zoom={zoom}
+              enableTorch={false}
+            />
+          )}
           
           <View style={cameraStyles.overlay}>
             <View style={cameraStyles.controlsRow}>
